@@ -56,144 +56,6 @@
             box-shadow: inset 0 1px 1px rgba(255,0,0,0.3), 0 0 8px rgba(255,0,0,0.3);
 }
     </style>
-    <script>
-       
-        //abrirGlobespotter($("#flashContent"), document.getElementById("japi"));
-        var swfVersionStr = "11.1.0";
-	
-      var xiSwfUrlStr = "playerProductInstall.swf";
-
-      var flashvars = {
-          globeSpotterConfigurationFilePath: "./config/application/GlobeSpotterConfiguration_Azure_NL.xml",
-          globeSpotterConfigurationId: "ortho_nl"
-      };
-
-      var params = {
-          quality: "high",
-          bgcolor: "#888888",
-          allowscriptaccess: "always",
-          allowfullscreen: "true",
-          wmode: "direct"
-      };
-
-      var attributes = {
-          id: "japi",
-          name: "viewer_api",
-          align: "middle"
-      }
-
-      var q = window.location.search;
-      var h = window.location.hash;
-      var s = (q) ? q : (h) ? h : "";
-
-      swfobject.embedSWF(
-                "https://globespotter.cyclomedia.com/v31/api/viewer_api.swf" + s.toLowerCase(), "flashContent",   
-                "100%", "100%",
-                swfVersionStr, xiSwfUrlStr,
-                flashvars, params, attributes
-            );
-		
-      $("#flashContent").css("display", "block");
-      
-        var shared = "https://globespotter.cyclomedia.com/application/?ImageId=";
-        var gimageID = "";
-        var gyaw = "";
-        var gpitch = "";
-        var ghfov = "";
-        var api;
-
-        function hst_apiReady(readyState) {
-            //alert("API is ready for use.");
-            //start();
-            showParams();  
-            openinicial();
-            //openImage(globaID);
-        }
-
-        function apiReady()//verifica se API esta inicializada
-        {
-            api = document.getElementById("japi");
-
-            var ready = api && api.getAPIReadyState();
-
-            if (!ready) {
-                alert("API not ready.");
-            }
-            return ready;
-        }
-
-        function openinicial() {
-            if (apiReady) {
-                openNearestImage("-43.9402314,-19.987048")
-            }
-        }
-
-        function openNearestImage(value) {//função abrir imagem aparti de uma coordenada
-            if (apiReady()) {
-                var query = value; //coordenadas
-                var maxLocations = 1;
-
-                if (!query || query == "") {
-                    alert("aInvalid input.");
-                }
-                else {
-                    try {
-                        api.openNearestImage(query, maxLocations);             
-                    }
-                    catch (error) {
-                        alert("Error while opening an image: " + error);
-                    }
-                }
-            }
-        }
-		
-        function hst_openNearestImageResult(request, opened, imageID, position) {//função é chamda após abrir uma imagem atravez de coordenadas openNerestImage()
-            gimageID = imageID;
-
-        }
-        function hst_viewChanged(viewerID, yaw, pitch, hFov) {//atualizar angulo toda vez que movimenta a view
-
-            gyaw = yaw;
-            gpitch = pitch;
-            ghfov = hFov;
-        }
-
-        function showParams() {         
-          
-                document.getElementById("japi").setViewerRotationButtonsVisible(false);       
-                document.getElementById("japi").setViewerDetailImagesVisible(true);       
-                document.getElementById("japi").setRecordingLocationsVisible(true);
-                document.getElementById("japi").setAddressLocationsVisible(false);
-                document.getElementById("japi").setViewerCompassVisible(false);  
-                document.getElementById("japi").setViewerOverlayDrawDistanceEnabled(true);
-                document.getElementById("japi").setViewerOverlayAlphaEnabled(true);
-                document.getElementById("japi").setImageInformationEnabled(true);
-                document.getElementById("japi").setViewerToolBarVisible(true);
-                document.getElementById("japi").setViewerBrightnessEnabled(true);
-                document.getElementById("japi").setViewerCycleZoomLevelsEnabled(true);
-                document.getElementById("japi").setViewerPrintImageEnabled(true);
-                document.getElementById("japi").setViewerSaveImageEnabled(true);
-        }
-
-        function hst_componentReady() {
-            //alert("component ready" );
-            try {
-                //9931983
-                document.getElementById("japi").setSRSNameViewer("EPSG::9931983");
-                document.getElementById("japi").setSRSNameAddress("EPSG::9931983");
-                document.getElementById("japi").setAddressLanguageCode("br");
-              //document.getElementById("japi").setAddressDatabase("CMDatabase");
-                document.getElementById("japi").setAPIKey("SnUhCDkd2L4F6jQtu3olyrYJGzAtGnkpCjMdiv0dyLcl-3Ix2DgZeXQF6_w5KLEZ");
-                document.getElementById("japi").setUserNamePassword('<% = Session["User"]%>', '<% = Session["password"]%>');
-                document.getElementById("japi").setServiceURL("http://atlas.cyclomedia.com", 256);
-            }
-            catch (Error) // Its A String ...
-            {
-                alert("Component Ready Error: " + Error);
-            }
-        }
-
-     </script>
 
     <script type="text/javascript" src="japi/messurement.js"></script>
       <meta charset="utf-8">
@@ -602,7 +464,7 @@
 <div class="row" id="linha-6">
 
 <div ID="distanciamediadoispt" class="col-md-2 col-sm-2 col-md-offset-1 col-sm-offset-1" style="margin-bottom: 8px">
-<asp:TextBox runat="server" type="text" id="TextBox2" title="Distância média entre dosi postes" class="form-control numerotxt" style="width: 82%" placeholder="Código do Logradouro"></asp:TextBox>
+<asp:TextBox runat="server" type="text" id="TextBox2" title="Distância média entre dois postes" class="form-control numerotxt" style="width: 82%" placeholder="Distância média entre dois postes"></asp:TextBox>
 </div>
 
 <div ID="tipopostecao" class="col-md-2 col-sm-2" style="margin-bottom: 8px">
@@ -768,77 +630,11 @@
 </div>
 </div>
 
-<!---------------Inicio Row Medição------------------------------------------------------>
-<div class="row" id="controlmedicao">
-    <div class="col-md-10 col-md-offset-1">
-       <ul class="tab">
-          <li><a href="javascript:void(0)" id="linkpoint" class="tablinks  btn disabled" onclick="openmedicao(event, '1')"><img src="lib/images/point.png" width="8" height="8" /></a></li>
-          <li><a href="javascript:void(0)" id="linkline"  class="tablinks  btn disabled" onclick="openmedicao(event, '2')"><img src="lib/images/line.png" width="16" height="16" /></a></li>
-          <li><a href="javascript:void(0)" id="linkpoly" class="tablinks  btn disabled" onclick="openmedicao(event, '3')"><img src="lib/images/poly.png" width="16" height="16" /></a></li>
-          <li><a href="javascript:void(0)" id="playmedicao" class="tablinks" style="height: 26px;" onclick="abrirMedicao()"><span class="glyphicon glyphicon-play-circle"></span></a></li>
-        </ul>
-        
-
-        <div id="featuregeo" class="tabcontent">
-            <div style="height:100%; width:100%; margin-bottom:5px;">                            
-                                   
-            </div>
-            <div style="width: 100%; display: inline-block; position: relative;">
-                    <div style="width: 50%; float: left">                      
-                    <select id="measurementList" onchange="selectMeasurement()" title="Selecionar medição" style="color:Black; width:10%;"></select>                        
-                    <a id="btnplus" href="javascript:void(0)" onclick="createPointMeasurement();" class="myButton" title="Iniciar uma nova medição">Nova medição</a>
-                    <a id="btnopenponto"href="javascript:void(0)" onclick="openMeasurement();" class="myButton"  title="Abrir medição selecionada">Abrir</a>
-                    <a id="btncloseponto" href="javascript:void(0)" onclick="closeMeasurement();" class="myButton"  title="Fechar medição selecionada">Fechar</a>
-                    <a id="btnapagarponto" href="javascript:void(0)" onclick="" class="myButton"  title="Apagar medição selecionada">Apagar</a>
-                     <input style="float:right;  " type="button" id="btnremoveponto" class="btn btn-danger btnMedicao" onclick="removeAllMeasurement();" value="Apagar"  title="Apagar todas as medição"/>
-
-                        <br />
-                    <input type="checkbox" ID="telaModeToggle" onClick="travar()"/>
-                        <label style="color:Black;"  class="tiny-label">Travar tela</label>
-                    <input checked="checked" type="checkbox" id="smartClickModeToggle" onClick="toggleSmartClickMode();"/>
-                        <label style="color:Black;"  class="tiny-label">Clique inteligente</label>
-                    <input checked="checked" type="checkbox" id="seriesModeToggle" onClick="toggleSeriesMode();" />
-                        <label style="color:Black;"  title="">Habilitar series  </label><br />
-                    </div>
-                <div style="width: 50%; float: right">
-                   
-                </div>
-            </div>
-            </div>
-
-       <div id="divPontoInfo">
-
-       </div>
-        <div id="divLinhaInfo">
-
-       </div>
-        <div id="divPoliInfo">
-
-       </div>
-
-    </div>
-</div>
-
-           
-           
  <!--------Inicio Row Globespotter e fotos--------------------------------------------------> 
                            
 <div id="globespotter_fotos" class="row" style="margin-bottom:2px; overflow:hidden;">
-<div class="col-md-5 col-md-offset-1">
-<div id="flashDiv"  style="height:530px;width:100%;">
+<div class="col-md-5 col-md-offset-1" style="background-color: red; height: 590px">
 
-<div id="flashContent">
-               
-<script type="text/javascript">
-document.write(
-"<a href='http://www.adobe.com/go/getflashplayer'><img src='" + (document.location.protocol == "https:" ? "https:" : "http:") +
-"//www.adobe.com/images/shared/download_buttons/get_flash_player.gif' alt='Get Adobe Flash player' /></a>"
-);
-</script>
-
-</div>                        
-
-</div>
 </div>
 
 <div class="col-md-5">
@@ -873,7 +669,7 @@ document.write(
 </form>
    
 
-</div>
+
     
     <script>
        
@@ -1559,17 +1355,8 @@ document.write(
             // getPontos("TESTE");
 
 
-            var url = 'http://www.aryagis.com/arcgis/services/CLI008/16008A/MapServer/WMSServer';
+           
 
-            var centro=L.tileLayer.betterWms(url, {
-                layers: '1',
-                transparent: true,
-                attribution: "<a target='_blank' href='http://www.aryamap.com'>Ortofoto</a>",
-                format: 'image/png',
-                tiled: true,
-                maxZoom: 22
-            
-            }).addTo(map);
 
         
             /////////////////////////ICON
@@ -1617,8 +1404,8 @@ document.write(
             };
        
             var overlayMaps = {
-                "REMO ": ilum,
-                "CENTRO_WMS ":centro
+                "REMO ": ilum
+                
 
             };
             L.control.scale().addTo(map);
