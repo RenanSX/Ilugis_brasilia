@@ -898,7 +898,12 @@
             medset($('#<%=txtMed.ClientID%>'));
             observacaoset($('#<%=txtObservacao.ClientID%>'));
             latset($('#<%=txtLat.ClientID%>'));
-            lngset($('#<%=txtLng.ClientID%>'));    
+            lngset($('#<%=txtLng.ClientID%>')); 
+            distmeddoispostesset( $("#<%=txtdistmeddoispostes.ClientID %>"));
+            tipoposteacaoset($("#<%=ddltipoposteacao.ClientID %>"));
+            larguraviaset($("#<%=txtlarguravia.ClientID %>"));
+            larguracantcentralset($("#<%=txtlarguracantcentral.ClientID %>"));{
+            largurapasseioset($("#<%=txtlargurapasseio.ClientID %>"));
         }
 
         function chamarValidaForm() {
@@ -968,7 +973,6 @@
                         var result = -1;
                        
                         result = buscaBinariaSimples(lista, lista.length, $('#<%=txtCodIluminacao.ClientID%>').val());
-                        alert(result)
                         if (result != -1) {
                             var latlong = convertUTM(lista[result][2], lista[result][3]);
                             selectIluminacao(lista[result][0], lista[result][1], latlong[1], latlong[0], lista[result][4])
@@ -1058,9 +1062,9 @@
                 alterarTipoBraco($("#<%=txtCodIluminacao.ClientID %>"), $("#<%=ddlTipoBraco.ClientID %>"), $("#<%=txtProjBraco.ClientID %>"),  $("#<%=ddlTipoAlimentacao.ClientID %>"),  $("#<%=ddlTipoPoste.ClientID %>"), $("#<%=txtAltPoste.ClientID %>"));
             });
 
-            function fonteLuminosa() {
+           <%-- function fonteLuminosa() {
                 tipoFonteLuminosa($("#<%=ddlTipoFonteLum.ClientID %>"),$("#<%=ddlPotFonteLum.ClientID %>") );
-            }
+            }--%>
 
 
             /*-------------------------Padrao para o tipo e potencia de fonte luminosa--------------*/
@@ -1496,60 +1500,6 @@
 
         }
 
-        
-           
-
-            // getPontos("TESTE");
-
-
-           
-
-
-        
-            /////////////////////////ICON
-
-
-            //////////////////////
-      
-                
-
-            ///////////////////////////////////banco
-
-           
-
-
-          
-
-            
-        
-
-
-            /*----------------------------------Padrão tipo de braço e projeção do braço------------*/
- 
-       
-            /*-------------------------Padrao para o tipo e potencia de fonte luminosa--------------*/
-           
-            /*-------------------------------------Tipo relé e tipo reator baseado no tipo de luminária---------------------------*/
-        
-
-
-           
-
-           
-
-            /*-------------------------Padrao para Tipo de braço ou poste com tipo de alimentação-------------------------*/
-           
-
-            /*---------------------------------Padrao Quantidade de Luminarias e quantidade de fontes luminosas-------------------------*/
-
-           
-           
-            
-            
-            
-            /////////////////////////////////////////////////////////////limpar dados
-          
-            
         </script>
     
 </asp:Content>
