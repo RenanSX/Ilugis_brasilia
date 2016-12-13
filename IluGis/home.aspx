@@ -25,6 +25,9 @@
 
     <script src="/dist/Leaflet-WFST.src.js"></script>
     <script src="src/L.TileLayer.BetterWMS.js"></script>
+
+      <link href="css/theodolite.css" rel="stylesheet" />   
+    <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?key=AIzaSyA_2F4f39ncWIbzriIlpHSQXe5JRpAkvEU&sensor=false&libraries=geometry"></script>
     <style>
         /*FUNDO RGB: 424263   2A2A3F*/
         /*COLOR GLOBESPOTTER*/
@@ -69,12 +72,195 @@
       <script src="fotorama.js"></script>
 
       <!-- Just don’t want to repeat this prefix in every img[src] -->
-      
+      <script type="text/javascript">
+          function distance(p1, p2) {
+              var R = 6371010;
+              var dLat = (Math.PI / 180.0) * ((p2.lat() - p1.lat()));
+              var dLon = (Math.PI / 180.0) * ((p2.lng() - p1.lng()));
+              var lat1 = (Math.PI / 180.0) * p1.lat();
+              var lat2 = (Math.PI / 180.0) * p2.lat()
+              var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                    Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2);
+              var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+              var d = R * c;
+              return d;
+          }
+          function bearing(p1, p2) {
+              var dLon = (Math.PI / 180.0) * ((p2.lng() - p1.lng()));
+              var lat1 = (Math.PI / 180.0) * p1.lat();
+              var lat2 = (Math.PI / 180.0) * p2.lat()
+              var y = Math.sin(dLon) * Math.cos(lat2);
+              var x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
+              var brng = Math.atan2(y, x) * (180.0 / Math.PI);
+              if (brng < 0) {
+                  return 360 + brng
+              }
+              else {
+                  return brng
+              }
+          }
+
+          function movePoint(p1, a, d) {
+              var brng = a * (Math.PI / 180.0);
+              var R = 6371010;
+              var lat1 = (Math.PI / 180.0) * p1.lat();
+              var lon1 = (Math.PI / 180.0) * p1.lng()
+              var lat2 = Math.asin(Math.sin(lat1) * Math.cos(d / R) +
+                        Math.cos(lat1) * Math.sin(d / R) * Math.cos(brng));
+              var lon2 = lon1 + Math.atan2(Math.sin(brng) * Math.sin(d / R) * Math.cos(lat1),
+                               Math.cos(d / R) - Math.sin(lat1) * Math.sin(lat2));
+
+              return [lat2 * (180.0 / Math.PI), lon2 * (180.0 / Math.PI)]
+          }
+          function calcHeight(bh, d, a) {
+              return ((Math.tan((Math.PI / 180.0) * a) * d) + bh);
+          }
+          function initialize() {
+              if (document.location.hash.length == 0) {
+                  loadInfo = "37.795962,-122.394607/37.795,-122.3946/180/0".split("/");
+              }
+              else {
+                  loadInfo = document.location.hash.replace("#", "").split("/");
+              }
+              var dist;
+              var baseheight = 0;
+              var angle = 1 * loadInfo[2];
+              var pitch = 0;
+              var posarr = new google.maps.MVCArray();
+              var mapCtr = new google.maps.LatLng((loadInfo[0].split(",")[0] * 1), (loadInfo[0].split(",")[1] * 1));
+              var mapDiv = document.getElementById('map_canvas');
+              var map = new google.maps.Map(mapDiv, {
+                  center: mapCtr,
+                  zoom: 18,
+                  mapTypeId: google.maps.MapTypeId.SATELLITE
+              });
+
+              var panoramaOptions = {
+                  position: mapCtr,
+                  pov: {
+                      heading: angle,
+                      pitch: pitch
+                  }
+              };
+              var panorama = new google.maps.StreetViewPanorama(document.getElementById("pano"), panoramaOptions);
+
+              map.setStreetView(panorama);
+
+              var indicator = new google.maps.Marker({
+                  map: map,
+                  position: new google.maps.LatLng((loadInfo[1].split(",")[0] * 1), (loadInfo[1].split(",")[1] * 1)),
+                  draggable: true
+              });
+              posarr.push(mapCtr);
+              posarr.push(indicator.getPosition())
+              dist = distance(indicator.getPosition(), mapCtr);
+              var line = new google.maps.Polyline({
+                  map: map,
+                  path: posarr,
+                  strokeColor: "#F00",
+                  strokeOpacity: 0.5
+              });
+
+              line.setMap(map);
+
+              google.maps.event.addListener(panorama, 'position_changed', function () {
+                  latD = panorama.getPosition().lat() - mapCtr.lat();
+                  lngD = panorama.getPosition().lng() - mapCtr.lng();
+                  indicator.setPosition(new google.maps.LatLng((latD + indicator.getPosition().lat()), (lngD + indicator.getPosition().lng())));
+                  mapCtr = new google.maps.LatLng(panorama.getPosition().lat(), panorama.getPosition().lng());
+
+                  calcAll();
+                  posarr.setAt(0, mapCtr);
+                  posarr.setAt(1, indicator.getPosition());
+                  document.location.hash = mapCtr.toUrlValue() + "/" + indicator.getPosition().toUrlValue() + "/" + Math.round(dang) + "/0";
+              });
+              google.maps.event.addListener(indicator, 'dragend', function () {
+                  dist = distance(indicator.getPosition(), mapCtr)
+                  panorama.setPov({
+                      heading: bearing(mapCtr, indicator.getPosition()),
+                      pitch: pitch
+                  });
+                  document.location.hash = mapCtr.toUrlValue() + "/" + indicator.getPosition().toUrlValue() + "/" + Math.round(dang) + "/0";
+                  calcAll();
+
+              });
+              google.maps.event.addListener(panorama, 'pov_changed', function () {
+                  angle = panorama.getPov().heading;
+                  pitch = panorama.getPov().pitch;
+                  nP = movePoint(mapCtr, angle, dist);
+                  indicator.setPosition(new google.maps.LatLng(nP[0], nP[1]));
+                  posarr.setAt(1, indicator.getPosition());
+                  calcAll();
+              });
+
+              function calcAll() {
+
+                  a = calcHeight(baseheight, dist, pitch);
+                  if (angle < 0) { dang = 360 + angle }
+                  else { dang = angle }
+                  $("#distance").text((Math.round(dist * 100) / 100));
+                  $("#heading").text(Math.round(dang));
+                  $("#pitch").text(Math.round(pitch));
+                  $("#baseheight").text((Math.round(baseheight * 100) / 100));
+                  $("#estheight").text((Math.round(a * 100) / 100));
+                  info = document.location.href.replace("#", "") + "#" + mapCtr.toUrlValue() + "/" + indicator.getPosition().toUrlValue() + "/" + Math.round(dang) + "/0";
+
+                  $("#linkloc").val(info);
+
+              }
+              $("#baseset").click(function () {
+                  baseheight = -1 * calcHeight(0, dist, pitch);
+                  $("#baser").css("top", 200);
+                  sTop = 200;
+                  calcAll();
+              });
+              var stY;
+              var sTop = 200;
+              var accM = 0;
+              var pDivHeight = 0;
+              $("#pano").on("mousedown", function (eSt) {
+                  stY = eSt.offsetY;
+                  startDrag();
+              });
+              var startDrag = function () {
+                  $("#pano").on("mousemove", function (eEn) {
+                      enY = eEn.offsetY;
+                      moveA = ((enY - stY) + sTop) + accM;
+                      if (moveA >= 400) {
+                          actualMove = 400;
+                          $("#baser").css("opacity", 0.25)
+                      }
+                      else if (moveA <= 0) {
+                          actualMove = 0;
+                          $("#baser").css("opacity", 0.25)
+                      }
+                      else {
+                          actualMove = moveA;
+                          $("#baser").css("opacity", 0.75)
+                      }
+
+                      $("#baser").css("top", actualMove);
+
+
+                  });
+              }
+              $("#pano").on("mouseup", function () {
+                  sTop = moveA;
+                  $("#pano").off("mousemove");
+              });
+
+              $("#linkloc").on("focus", function () {
+                  $(this).select();
+              });
+
+
+          }
+</script>
             
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="body" runat="server">
 
-     <iv class="content">
+     <div class="content">
           
        <form autocomplete="off" runat="server" class="form-inline" style="width: 100%;" name="myForm" novalidate>
            <asp:HiddenField ID="hfLoginPK" runat="server" Value="" />
@@ -84,27 +270,27 @@
            
            
             <asp:ScriptManager ID="ScriptManager1" runat="server"/>
-<!-----------------Inicio Titulo----------------------------------------------------->
-<div class="row" style="margin-bottom:5px;">
-<div class="col-md-12 col-sm-12">
-<h4 style="text-align: center;">Sistema de Cadastro de Iluminação</h4>
-</div>
-</div>
-<!--------------------Fim titulo--------------------------------------------------------->
+        <!-----------------Inicio Titulo----------------------------------------------------->
+        <div class="row" style="margin-bottom:5px;">
+            <div class="col-md-12 col-sm-12">
+              <h4 style="text-align: center;">Sistema de Cadastro de Iluminação</h4>
+            </div>
+        </div>
+        <!--------------------Fim titulo--------------------------------------------------------->
 
 
-<!--------------Inicio Row notificacao-------------------------------------------------------------------->	
-<div class="row" id="notificacao">
-<div runat="server" id="Msucesso" visible="false" class="alert alert-success me" >                                
-</div>
-<div runat="server" id="Malerta" visible="false" class="alert alert-warning">               
-</div>
-<div runat="server" id="Merro" visible="false" class="alert alert-danger">                
-</div>
-</div>
+        <!--------------Inicio Row notificacao-------------------------------------------------------------------->	
+        <div class="row" id="notificacao">
+            <div runat="server" id="Msucesso" visible="false" class="alert alert-success me" >                                
+            </div>
+            <div runat="server" id="Malerta" visible="false" class="alert alert-warning">         
+            </div>
+            <div runat="server" id="Merro" visible="false" class="alert alert-danger">                
+            </div>
+        </div>
 	
-<!------------------Inicio Primeira Row, BUSCA (lcalidade/equipe e Código do ponto de iluminação, postes padrões e globespotter com googlemaps---------------->	
-<div class="row" id="busca">
+    <!------------------Inicio Primeira Row, BUSCA (lcalidade/equipe e Código do ponto de iluminação, postes padrões e globespotter com googlemaps---------------->	
+    <div class="row" id="busca">
         <div  ID="localidade" class=" col-md-3 col-sm-3 col-md-offset-1 col-sm-offset-1" style="margin-bottom: 8px">             
             <asp:DropDownList  Style="width: 82%;  display:inline-block;" ID="ddllocalidade" class=" form-control input-sm " runat="server" title="Equipe"  autofocus="true">
             <asp:ListItem Text ="Selecione o local" Value = "-1"></asp:ListItem>
@@ -153,7 +339,7 @@
             <a id="infolista">
             <span class="glyphicon glyphicon-search" title="Buscar" style="font-size: 14px; cursor:pointer;"></span>
             </a>
-            </div>
+          </div>
 
             <button style=" background-color:#9AFF9A; height: 26px;" id="google"  title="Abrir Google Maps" type="button" >
             <span class="glyphicon glyphicon-globe google" aria-hidden="true" style="font-size: 16px"></span>
@@ -165,84 +351,84 @@
     
     
 
-    <div id="padrao" class="col-md-2 col-sm-2" style="margin-bottom: 8px; display:inline-block;">
+        <div id="padrao" class="col-md-2 col-sm-2" style="margin-bottom: 8px; display:inline-block;">
  
-        <button  id="btncomuncurto"  title="Ponto mais cadastrado com braço curto" type="button" style=" background-color:#00BFFF" >
-        <span class="glyphicon glyphicon-import btncomun" aria-hidden="true" style="font-size: 16px"></span>
-        </button>
+            <button  id="btncomuncurto"  title="Ponto mais cadastrado com braço curto" type="button" style=" background-color:#00BFFF" >
+            <span class="glyphicon glyphicon-import btncomun" aria-hidden="true" style="font-size: 16px"></span>
+            </button>
 
-        <button  id="btncomunmedio"  title="Ponto mais cadastrado com Braço Médio" type="button" style=" background-color:#FFA500" >
-        <span class="glyphicon glyphicon-import btncomun" aria-hidden="true" style="font-size: 16px"></span>
-        </button>
+            <button  id="btncomunmedio"  title="Ponto mais cadastrado com Braço Médio" type="button" style=" background-color:#FFA500" >
+            <span class="glyphicon glyphicon-import btncomun" aria-hidden="true" style="font-size: 16px"></span>
+            </button>
 
-        <button  id="btncomunlongo"  title="Ponto mais cadastrado com Braço Longo" type="button" style=" background-color:#FF4040">
-        <span class="glyphicon glyphicon-import btncomun" aria-hidden="true" style="font-size: 16px"></span>
-        </button>
+            <button  id="btncomunlongo"  title="Ponto mais cadastrado com Braço Longo" type="button" style=" background-color:#FF4040">
+            <span class="glyphicon glyphicon-import btncomun" aria-hidden="true" style="font-size: 16px"></span>
+            </button>
 
-        <button  id="btncomunrodovia"  title="Ponto mais cadastrado em Rodovias" type="button" style=" background-color:#EE7AE9">
-        <span class="glyphicon glyphicon-import btncomun" aria-hidden="true" style="font-size: 16px"></span>
-        </button>
-        <a runat="server" href="help.aspx#postes_padroes" target="_blank" >
-        <span class="glyphicon glyphicon-question-sign" title="Ajuda"  style="font-size: 18px"></span>
-        </a>   
+            <button  id="btncomunrodovia"  title="Ponto mais cadastrado em Rodovias" type="button" style=" background-color:#EE7AE9">
+            <span class="glyphicon glyphicon-import btncomun" aria-hidden="true" style="font-size: 16px"></span>
+            </button>
+            <a runat="server" href="help.aspx#postes_padroes" target="_blank" >
+            <span class="glyphicon glyphicon-question-sign" title="Ajuda"  style="font-size: 18px"></span>
+            </a>   
 
-        </div>
+            </div>
 
-</div>
+    </div>
 
 
 <!-----------------------Inicio da Row 1 (Tipo de braço, projeção do Braço, tipo de poste, altura poste e quantidade de luminarias)------------------->
-<div class="row" id="linha-1">
+    <div class="row" id="linha-1">
 
-<div ID="tipobraco" title="Tipo de braço" class="col-md-2 col-sm-2 col-md-offset-1 col-sm-offset-1" style="margin-bottom: 8px">
-<asp:DropDownList  Style="width: 82%; display:inline-block;" ID="ddlTipoBraco" class=" form-control input-sm " runat="server"  autofocus="true">
-<asp:ListItem Text ="Tipo de braço" Value = "-1"></asp:ListItem>
-<asp:ListItem Text ="Curto" Value = "Curto"></asp:ListItem>   
-<asp:ListItem Text ="Médio" Value = "Medio"></asp:ListItem>
-<asp:ListItem Text ="Médio Pesado" Value = "Medio Pesado"></asp:ListItem>      
-<asp:ListItem Text ="Longo" Value = "Longo"></asp:ListItem>   
-<asp:ListItem Text ="Especial" Value = "Especial"></asp:ListItem>
-<asp:ListItem Text ="Sem Braço" Value = "Sem braco"></asp:ListItem>                                             
-</asp:DropDownList> 
-<a runat="server" href="help.aspx#tipo_de_braco" target="_blank" >
-<span class="glyphicon glyphicon-question-sign" title="Ajuda"  style="font-size: 18px"></span>
-</a>                                     
-</div>
+        <div ID="tipobraco" title="Tipo de braço" class="col-md-2 col-sm-2 col-md-offset-1 col-sm-offset-1" style="margin-bottom: 8px">
+            <asp:DropDownList  Style="width: 82%; display:inline-block;" ID="ddlTipoBraco" class=" form-control input-sm " runat="server"  autofocus="true">
+            <asp:ListItem Text ="Tipo de braço" Value = "-1"></asp:ListItem>
+            <asp:ListItem Text ="Curto" Value = "Curto"></asp:ListItem>   
+            <asp:ListItem Text ="Médio" Value = "Medio"></asp:ListItem>
+            <asp:ListItem Text ="Médio Pesado" Value = "Medio Pesado"></asp:ListItem>      
+            <asp:ListItem Text ="Longo" Value = "Longo"></asp:ListItem>   
+            <asp:ListItem Text ="Especial" Value = "Especial"></asp:ListItem>
+            <asp:ListItem Text ="Sem Braço" Value = "Sem braco"></asp:ListItem>                                             
+            </asp:DropDownList> 
+            <a runat="server" href="help.aspx#tipo_de_braco" target="_blank" >
+            <span class="glyphicon glyphicon-question-sign" title="Ajuda"  style="font-size: 18px"></span>
+            </a>                                     
+         </div>
 
-<div ID="projecaobraco" class="col-md-2 col-sm-2" style="margin-bottom: 8px">
-<asp:TextBox runat="server" type="text" ID="txtProjBraco" title="Projeção de Braço (em M)" class="form-control  " style="width: 82%; display:inline-block;" placeholder="Projeção de Braço (em M)" ></asp:TextBox>
-<a runat="server" href="help.aspx#projecao_do_braco" target="_blank">
-<span class="glyphicon glyphicon-question-sign" title="Ajuda"  style="font-size: 18px"></span>
-</a>
-</div>
+        <div ID="projecaobraco" class="col-md-2 col-sm-2" style="margin-bottom: 8px">
+        <asp:TextBox runat="server" type="text" ID="txtProjBraco" title="Projeção de Braço (em M)" class="form-control  " style="width: 82%; display:inline-block;" placeholder="Projeção de Braço (em M)" ></asp:TextBox>
+        <a runat="server" href="help.aspx#projecao_do_braco" target="_blank">
+        <span class="glyphicon glyphicon-question-sign" title="Ajuda"  style="font-size: 18px"></span>
+        </a>
+        </div>
 
-<div ID="tipoposte" class="col-md-2 col-sm-2" style="margin-bottom: 8px">
-<asp:DropDownList  Style="width: 82%; display:inline-block;" ID="ddlTipoPoste" title="TIpo de Poste" class=" form-control input-sm " runat="server"  autofocus="true">
-<asp:ListItem Text ="Tipo de poste" Value = "-1"></asp:ListItem>
-<asp:ListItem Text ="Metálico" Value = "Metalico"></asp:ListItem>
-<asp:ListItem Text ="Concreto Circular" Value = "Concreto Circular"></asp:ListItem>
-<asp:ListItem Text ="Madeira" Value = "Madeira"></asp:ListItem>
-<asp:ListItem Text ="Concreto Duplo T" Value = "Concreto Duplo T"></asp:ListItem>
-</asp:DropDownList>
-<a runat="server" href="help.aspx#tipo_de_poste" target="_blank">
-<span class="glyphicon glyphicon-question-sign" title="Ajuda" style="font-size: 18px"></span>
-</a>                 
-</div>
+        <div ID="tipoposte" class="col-md-2 col-sm-2" style="margin-bottom: 8px">
+        <asp:DropDownList  Style="width: 82%; display:inline-block;" ID="ddlTipoPoste" title="TIpo de Poste" class=" form-control input-sm " runat="server"  autofocus="true">
+        <asp:ListItem Text ="Tipo de poste" Value = "-1"></asp:ListItem>
+        <asp:ListItem Text ="Metálico" Value = "Metalico"></asp:ListItem>
+        <asp:ListItem Text ="Concreto Circular" Value = "Concreto Circular"></asp:ListItem>
+        <asp:ListItem Text ="Madeira" Value = "Madeira"></asp:ListItem>
+        <asp:ListItem Text ="Concreto Duplo T" Value = "Concreto Duplo T"></asp:ListItem>
+        </asp:DropDownList>
+        <a runat="server" href="help.aspx#tipo_de_poste" target="_blank">
+        <span class="glyphicon glyphicon-question-sign" title="Ajuda" style="font-size: 18px"></span>
+        </a>                 
+        </div>
 
-<div ID="alturaposte" class="col-md-2 col-sm-2" style="margin-bottom: 8px">
-<asp:TextBox runat="server" type="text" id="txtAltPoste" title="Altura do Poste" class="form-control numerotxt " style="width: 82%; display:inline-block;" placeholder="Altura do Poste"></asp:TextBox>
-<a runat="server" href="help.aspx#altura_do_poste" target="_blank" style="font-size: 18px">
-<span class="glyphicon glyphicon-question-sign" title="Ajuda" style="font-size: 18px"></span>
-</a>
-</div>
-<div ID="alturainstluminaria" class="col-md-2 col-sm-2" style="margin-bottom: 8px">
-<asp:TextBox runat="server" type="text" id="txtAltInstLum" title="Altura de instalação da Luminária" class="form-control " style="width: 82%; display:inline-block;" placeholder="Altura de instalação da LUMINÁRIA"></asp:TextBox>                
-<a runat="server" href="help.aspx#altura_da_instalacao_luminaria" target="_blank">
-<span class="glyphicon glyphicon-question-sign" title="Ajuda" style="font-size: 18px"></span>
-</a>
-</div>
+        <div ID="alturaposte" class="col-md-2 col-sm-2" style="margin-bottom: 8px">
+            <asp:TextBox runat="server" type="text" id="txtAltPoste" title="Altura do Poste" class="form-control numerotxt " style="width: 82%; display:inline-block;" placeholder="Altura do Poste"></asp:TextBox>
+            <a runat="server" href="help.aspx#altura_do_poste" target="_blank" style="font-size: 18px">
+            <span class="glyphicon glyphicon-question-sign" title="Ajuda" style="font-size: 18px"></span>
+            </a>
+        </div>
+        <div ID="alturainstluminaria" class="col-md-2 col-sm-2" style="margin-bottom: 8px">
+            <asp:TextBox runat="server" type="text" id="txtAltInstLum" title="Altura de instalação da Luminária" class="form-control " style="width: 82%; display:inline-block;" placeholder="Altura de instalação da LUMINÁRIA"></asp:TextBox>                
+            <a runat="server" href="help.aspx#altura_da_instalacao_luminaria" target="_blank">
+            <span class="glyphicon glyphicon-question-sign" title="Ajuda" style="font-size: 18px"></span>
+            </a>
+        </div>
     
-</div>
+    </div>
 
 <!----------------------Inicio Row 2 (tipo de luminaria, tipo reator, tipo rele, quantidade fonte luminosa e tipo fonte luminosa)--------------------->
 <div class="row" id="linha-2">
@@ -550,47 +736,47 @@
 <!-------Inicio Row 9 (UTM, numero poste, precisao, poste no prumo e poste com avaria)----------------------------------------------------------------------->
 
 <div class="row" id="linha-9" style="display:none">
-<div ID="postoavaria" class="col-md-2 col-sm-2 col-md-offset-1 col-sm-offset-1" style="margin-bottom: 8px">
-<asp:DropDownList  Style="width: 82%; display:inline-block;" title="Posto com avaria" ID="ddlPostoAvaria" class=" form-control input-sm " runat="server"  autofocus="true">
-<asp:ListItem Text ="Posto com avaria" Value = "-1"></asp:ListItem> 
-<asp:ListItem Text ="Sim" Value = "sim"></asp:ListItem>   
-<asp:ListItem Text ="Não" Value = "nao"></asp:ListItem>                     
-</asp:DropDownList>
-</div>
+    <div ID="postoavaria" class="col-md-2 col-sm-2 col-md-offset-1 col-sm-offset-1" style="margin-bottom: 8px">
+            <asp:DropDownList  Style="width: 82%; display:inline-block;" title="Posto com avaria" ID="ddlPostoAvaria" class=" form-control input-sm " runat="server"  autofocus="true">
+            <asp:ListItem Text ="Posto com avaria" Value = "-1"></asp:ListItem> 
+            <asp:ListItem Text ="Sim" Value = "sim"></asp:ListItem>   
+            <asp:ListItem Text ="Não" Value = "nao"></asp:ListItem>                     
+            </asp:DropDownList>
+    </div>
 
 
-<div ID="LampadaAcesaDia" class="col-md-2 col-sm-2 " style="margin-bottom: 8px">
-<asp:DropDownList  Style="width: 82%; display:inline-block;" title="Lâmpada acesa durante o dia" ID="ddlLampAcesaDia" class=" form-control input-sm " runat="server"  autofocus="true">
-<asp:ListItem Text ="Lâmpada acesa durante o dia" Value = "-1"></asp:ListItem> 
-<asp:ListItem Text ="Sim" Value = "sim"></asp:ListItem>   
-<asp:ListItem Text ="Não" Value = "nao"></asp:ListItem>                     
-</asp:DropDownList>
-</div>
+    <div ID="LampadaAcesaDia" class="col-md-2 col-sm-2 " style="margin-bottom: 8px">
+            <asp:DropDownList  Style="width: 82%; display:inline-block;" title="Lâmpada acesa durante o dia" ID="ddlLampAcesaDia" class=" form-control input-sm " runat="server"  autofocus="true">
+            <asp:ListItem Text ="Lâmpada acesa durante o dia" Value = "-1"></asp:ListItem> 
+            <asp:ListItem Text ="Sim" Value = "sim"></asp:ListItem>   
+            <asp:ListItem Text ="Não" Value = "nao"></asp:ListItem>                     
+            </asp:DropDownList>
+     </div>
 
-<div ID="numproximo" class="col-md-2 col-sm-2" style="margin-bottom: 8px">
-<asp:TextBox runat="server" type="text" id="txtNumeroMaisProx" title="Número mais próximo" class="form-control numerotxt" style="width: 100%" placeholder="Número mais próximo"></asp:TextBox>
-</div>
+     <div ID="numproximo" class="col-md-2 col-sm-2" style="margin-bottom: 8px">
+            <asp:TextBox runat="server" type="text" id="txtNumeroMaisProx" title="Número mais próximo" class="form-control numerotxt" style="width: 100%" placeholder="Número mais próximo"></asp:TextBox>
+     </div>
 
-<div ID="SituacaoLuminaria" class="col-md-2 col-sm-2" style="margin-bottom: 8px">
-<asp:DropDownList  Style="width: 82%; display:inline-block;" title="Situação da Luminária" ID="ddlSituacaoLum" class=" form-control input-sm " runat="server"  autofocus="true">
-<asp:ListItem Text ="Situação da Luminária" Value = "-1"></asp:ListItem> 
-<asp:ListItem Text ="Lente suja" Value = "lente suja"></asp:ListItem>   
-<asp:ListItem Text ="Luminária aberta" Value = "luminaria aberta"></asp:ListItem>
-<asp:ListItem Text ="Luminária sem lente" Value = "luminaria sem lente"></asp:ListItem>  
-<asp:ListItem Text ="Luminária virada para cima" Value = "luminaria virada para cima"></asp:ListItem>  
-<asp:ListItem Text ="Braço em luminária" Value = "braco sem luminaria"></asp:ListItem>  
-<asp:ListItem Text ="Luminária danificada" Value = "luminaria danificada"></asp:ListItem>                       
-</asp:DropDownList>
-</div>
+    <div ID="SituacaoLuminaria" class="col-md-2 col-sm-2" style="margin-bottom: 8px">
+            <asp:DropDownList  Style="width: 82%; display:inline-block;" title="Situação da Luminária" ID="ddlSituacaoLum" class=" form-control input-sm " runat="server"  autofocus="true">
+            <asp:ListItem Text ="Situação da Luminária" Value = "-1"></asp:ListItem> 
+            <asp:ListItem Text ="Lente suja" Value = "lente suja"></asp:ListItem>   
+            <asp:ListItem Text ="Luminária aberta" Value = "luminaria aberta"></asp:ListItem>
+            <asp:ListItem Text ="Luminária sem lente" Value = "luminaria sem lente"></asp:ListItem>  
+            <asp:ListItem Text ="Luminária virada para cima" Value = "luminaria virada para cima"></asp:ListItem>  
+            <asp:ListItem Text ="Braço em luminária" Value = "braco sem luminaria"></asp:ListItem>  
+            <asp:ListItem Text ="Luminária danificada" Value = "luminaria danificada"></asp:ListItem>                       
+            </asp:DropDownList>
+    </div>
 
-<div ID="obstrucaoilum" class="col-md-2 col-sm-2" style="margin-bottom: 8px">
-<asp:DropDownList  Style="width: 82%; display:inline-block;" title="obstrução da iluminação" ID="ddlObsIlum" class=" form-control input-sm " runat="server"  autofocus="true">
-<asp:ListItem Text ="Obstrução da iluminação" Value = "-1"></asp:ListItem> 
-<asp:ListItem Text ="Iluminação não obstruida" Value = "iluminacao nao obstruida"></asp:ListItem>   
-<asp:ListItem Text ="Obstrução parcial por arborização" Value = "obstrucao parcial pro arborizacao"></asp:ListItem>
-<asp:ListItem Text ="Obstrução total por arborização" Value = "obstrucao total por arborizacao"></asp:ListItem>                  
-</asp:DropDownList>
-</div>
+    <div ID="obstrucaoilum" class="col-md-2 col-sm-2" style="margin-bottom: 8px">
+        <asp:DropDownList  Style="width: 82%; display:inline-block;" title="obstrução da iluminação" ID="ddlObsIlum" class=" form-control input-sm " runat="server"  autofocus="true">
+        <asp:ListItem Text ="Obstrução da iluminação" Value = "-1"></asp:ListItem> 
+        <asp:ListItem Text ="Iluminação não obstruida" Value = "iluminacao nao obstruida"></asp:ListItem>   
+        <asp:ListItem Text ="Obstrução parcial por arborização" Value = "obstrucao parcial pro arborizacao"></asp:ListItem>
+        <asp:ListItem Text ="Obstrução total por arborização" Value = "obstrucao total por arborizacao"></asp:ListItem>                  
+        </asp:DropDownList>
+    </div>
 
 
 </div>
@@ -599,80 +785,99 @@
 <!----------------Inicio Row Geocode (Latitude, Longitude, icone e observãcao)--------------------------------->
 <div class="row" id="geocode">
 
-<div ID="latitude" class="col-md-2 col-sm-2 col-md-offset-1 col-sm-offset-1" style="margin-bottom: 8px">
-<asp:TextBox Style="width: 82%" type="text" placeholder="Latitude" class="form-control input-sm" ID="txtLat" title="Latitude" runat="server" name="Latitude"></asp:TextBox>
-</div>
+        <div ID="latitude" class="col-md-2 col-sm-2 col-md-offset-1 col-sm-offset-1" style="margin-bottom: 8px">
+             <asp:TextBox Style="width: 82%" type="text" placeholder="Latitude" class="form-control input-sm" ID="txtLat" title="Latitude" runat="server" name="Latitude"></asp:TextBox>
+        </div>
 
-<div ID="longitude" class="col-md-2 col-sm-2" style="margin-bottom: 8px">
-<asp:TextBox Style="width: 82%" type="text" placeholder="Longitude" class="form-control input-sm" ID="txtLng" title="Longitude" runat="server" name="Longitude"></asp:TextBox>
-<button type="button" id="openGlobe" style="height: 29px;">
-<span class="glyphicon glyphicon-map-marker" aria-hidden="true"></span>
-</button>
-</div>
+        <div ID="longitude" class="col-md-2 col-sm-2" style="margin-bottom: 8px">
+                <asp:TextBox Style="width: 82%" type="text" placeholder="Longitude" class="form-control input-sm" ID="txtLng" title="Longitude" runat="server" name="Longitude"></asp:TextBox>
+                <button type="button" id="openGlobe" style="height: 29px;">
+                <span class="glyphicon glyphicon-map-marker" aria-hidden="true"></span>
+                </button>
+         </div>
 
- <div ID="observacao" class="col-md-4 col-sm-4" style="margin-bottom: 8px">
-<asp:TextBox Style="width: 92%" type="text" placeholder="Observação" class="form-control input-sm" ID="txtObservacao" title="Observação" runat="server" name="Observacao"></asp:TextBox>
+         <div ID="observacao" class="col-md-4 col-sm-4" style="margin-bottom: 8px">
+            <asp:TextBox Style="width: 92%" type="text" placeholder="Observação" class="form-control input-sm" ID="txtObservacao" title="Observação" runat="server" name="Observacao"></asp:TextBox>
 
-</div>
+        </div>
 
-<div class="col-md-2 col-sm-2">
-<asp:LinkButton Style="width: 82%; margin-bottom: 8px;" ID="LinkButtonCadastrar" OnClick="bntCadastrar_Click" runat="server"  type="button" class="btn btn-primary btn-sm pull-left cadastrar">
-<center> Cadastrar </center>
-</asp:LinkButton>
+        <div class="col-md-2 col-sm-2">
+            <asp:LinkButton Style="width: 82%; margin-bottom: 8px;" ID="LinkButtonCadastrar" OnClick="bntCadastrar_Click" runat="server"  type="button" class="btn btn-primary btn-sm pull-left cadastrar">
+            <center> Cadastrar </center>
+            </asp:LinkButton>
 
-<asp:LinkButton Style="width: 50%; display:none; margin-bottom: 8px;" OnClick="bntAlterar_Click" ID="LinkButtonAlterar"  runat="server"  type="button" class="btn btn-primary btn-sm pull-left cadastrar">
-<center> Alterar </center>
-</asp:LinkButton>
-<button style="width:30%; display:none; float:right; margin-bottom: 8px; margin-left:3%;" id="deletarInfo"   class="btn btn-danger pull-left btn-sm btn-xl" title="Excluir Dados Iluminação" type="button" >
-<span class="glyphicon glyphicon-trash delete" aria-hidden="true"></span>
-</button>
+            <asp:LinkButton Style="width: 50%; display:none; margin-bottom: 8px;" OnClick="bntAlterar_Click" ID="LinkButtonAlterar"  runat="server"  type="button" class="btn btn-primary btn-sm pull-left cadastrar">
+            <center> Alterar </center>
+            </asp:LinkButton>
+            <button style="width:30%; display:none; float:right; margin-bottom: 8px; margin-left:3%;" id="deletarInfo"   class="btn btn-danger pull-left btn-sm btn-xl" title="Excluir Dados Iluminação" type="button" >
+            <span class="glyphicon glyphicon-trash delete" aria-hidden="true"></span>
+            </button>
 
-</div>
-</div>
+        </div>
+    </div>
 
  <!--------Inicio Row Globespotter e fotos--------------------------------------------------> 
                            
-<div id="globespotter_fotos" class="row" style="margin-bottom:2px; overflow:hidden;">
-<div class="col-md-5 col-md-offset-1" style="background-color: red; height: 590px">
+    <div id="globespotter_fotos" class="row" style="margin-bottom:2px; overflow:hidden;">
+        <div class="col-md-5 col-md-offset-1" style=" height: 590px">
+              <div id="pcont">
 
-</div>
-
-<div class="col-md-5">
-<div id="sliderblx">
-
-<ul class='bxslider' style='height: 100%; width: 100%; position: absolute; padding:0;' >
-
-<li style='float: none; list-style: none; position: absolute; width: 467px; z-index: 0; display: block;'>
-<img src="img/logo_arya.jpg"  height="530"/>
-                        
-</li>
-<li style='float: none; list-style: none; position: absolute; width: 467px; z-index: 0; display: block;'>
-<img src="img/logo_arya.jpg"  height="530"/>
-                        
-</li>
-</ul>
-</div>
+                  <div id="pwrap">
                      
-</div>
+                          <div id="pano"></div>
+                          <div id="panosplit"></div>
+                          <div id="panovert"></div>
+                          <div id='baser'></div>
+                    </div>
+                    <div id="buthold">
+                        <button id="baseset" type="button" class="btn btn-lg btn-primary">Marcar base</button>
+                    </div>
+               </div>
+            </div>
+
+            <div class="col-md-5">
+                <div id="sliderblx">
+
+                <ul class='bxslider' style='height: 100%; width: 100%; position: absolute; padding:0;' >
+
+                <li style='float: none; list-style: none; position: absolute; width: 467px; z-index: 0; display: block;'>
+                <img src="img/logo_arya.jpg"  height="530"/>
+                        
+                </li>
+                <li style='float: none; list-style: none; position: absolute; width: 467px; z-index: 0; display: block;'>
+                <img src="img/logo_arya.jpg"  height="530"/>
+                        
+                </li>
+                </ul>
+                </div>
+                     
+            </div>
                                
 
-</div>
+    </div>
 
 <!-------------------------------------Mapa----------------------------------------------->
-<div class="row" id="mapa" style="margin-top: 5px;">
-<div class="col-md-10 col-md-offset-1">
-<div id="map" style="width:100%; height:500px; margin: 0;"></div>
-</div>
-</div>
+    <div class="row" id="mapa" style="margin-top: 5px;">
+        <div class="col-md-10 col-md-offset-1">
+            <div id="map" style="width:100%; height:500px; margin: 0; display:none"></div>
+        </div>
+    </div>
+     <div class="row" id="theodolite" style="margin-top: 5px;">
+        <div class="col-md-10 col-md-offset-1">
+             <div id="map_canvas"></div>
 
-<input type="hidden" id="_ispostback" value="<%=Page.IsPostBack.ToString()%>" />
-</form>
+             
+        </div>
+    </div>
+
+    <input type="hidden" id="_ispostback" value="<%=Page.IsPostBack.ToString()%>" />
+    </form>
    
-
+</div>
 
     
     <script>
-       
+        window.onload = initialize;
         function setValues()
         {
             codilumset($('#<%=txtCodIluminacao.ClientID%>'));
