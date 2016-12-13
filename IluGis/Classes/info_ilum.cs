@@ -40,6 +40,13 @@ namespace IluGis.Classes
         public string medicao { get; set; }
         public string cod_login { get; set; }
         public string observacao { get; set; }
+        public string tipo_posteacao { get; set; }
+        public string dist_med_dois_postes { get; set; }
+        public string largura_via { get; set; }
+        public string largura_passeio { get; set; }
+        public string largura_cant_central { get; set; }
+
+
 
 
         public info_ilum()
@@ -75,6 +82,11 @@ namespace IluGis.Classes
             this.medicao = string.Empty;
             this.cod_login = string.Empty;
             this.observacao = string.Empty;
+            this.tipo_posteacao = string.Empty;
+            this.dist_med_dois_postes = string.Empty;
+            this.largura_via = string.Empty;
+            this.largura_passeio = string.Empty;
+            this.largura_cant_central = string.Empty;
         }
 
         public string insert()

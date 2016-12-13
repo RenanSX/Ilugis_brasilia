@@ -15,16 +15,6 @@
     <link rel="stylesheet" type="text/css" href="css/estilo.css" />
     <script type="text/javascript" src="js/abas/javascript.js"></script>
 
-    <!------------------LEAFLET --------->
-
-    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
-	<link rel="stylesheet" href="../dist/Leaflet.Coordinates-0.1.5.css"/>
-    <script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
-    <%--<script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.js"></script>--%>
-    <script type="text/javascript" src="/dist/Leaflet.Coordinates-0.1.5.min.js"></script>
-
-    <script src="/dist/Leaflet-WFST.src.js"></script>
-    <script src="src/L.TileLayer.BetterWMS.js"></script>
 
       <link href="css/theodolite.css" rel="stylesheet" />   
     <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?key=AIzaSyA_2F4f39ncWIbzriIlpHSQXe5JRpAkvEU&sensor=false&libraries=geometry"></script>
@@ -649,12 +639,12 @@
 
 <div class="row" id="linha-6">
 
-<div ID="distanciamediadoispt" class="col-md-2 col-sm-2 col-md-offset-1 col-sm-offset-1" style="margin-bottom: 8px">
-<asp:TextBox runat="server" type="text" id="TextBox2" title="Distância média entre dois postes" class="form-control numerotxt" style="width: 82%" placeholder="Distância média entre dois postes"></asp:TextBox>
+<div ID="distmeddoispostes" class="col-md-2 col-sm-2 col-md-offset-1 col-sm-offset-1" style="margin-bottom: 8px">
+<asp:TextBox runat="server" type="text" id="txtdistmeddoispostes" title="Distância média entre dois postes" class="form-control" style="width: 82%" placeholder="Distância média entre dois postes"></asp:TextBox>
 </div>
 
-<div ID="tipopostecao" class="col-md-2 col-sm-2" style="margin-bottom: 8px">
-<asp:DropDownList  Style="width: 82%" id="DropDownList1" title="Tipo de Posteação" class=" form-control input-sm " runat="server"  autofocus="true">
+<div ID="tipoposteacao" class="col-md-2 col-sm-2" style="margin-bottom: 8px">
+<asp:DropDownList  Style="width: 82%" id="ddltipoposteacao" title="Tipo de Posteação" class=" form-control input-sm " runat="server"  autofocus="true">
 <asp:ListItem Text ="Tipo de Posteação" Value = "-1"></asp:ListItem>
 <asp:ListItem Text =" Posteação Unilateral" Value = "2" ></asp:ListItem>
 <asp:ListItem Text ="Posteação Bilateral Frontal" Value = "1"></asp:ListItem>
@@ -665,15 +655,15 @@
 </div>
 
 <div ID="larguravia" class="col-md-2 col-sm-2" style="margin-bottom: 8px">
-<asp:TextBox runat="server" type="text" id="TextBox3" title="Largura da via" class="form-control" style="width: 82%" placeholder="Largura da via"></asp:TextBox>
+<asp:TextBox runat="server" type="text" id="txtlarguravia" title="Largura da via" class="form-control" style="width: 82%" placeholder="Largura da via"></asp:TextBox>
 </div>
 
-<div ID="larguracanteirocentral" class="col-md-2 col-sm-2" style="margin-bottom: 8px">                        
-<asp:TextBox runat="server" type="text" id="TextBox4" title="Largura do canteiro central" class="form-control" style="width: 82%" placeholder="Largura do canteiro central"></asp:TextBox>                     
+<div ID="larguracantcentral" class="col-md-2 col-sm-2" style="margin-bottom: 8px">                        
+<asp:TextBox runat="server" type="text" id="txtlarguracantcentral" title="Largura do canteiro central" class="form-control" style="width: 82%" placeholder="Largura do canteiro central"></asp:TextBox>                     
 </div>
 
 <div ID="largurapasseio" class="col-md-2 col-sm-2" style="margin-bottom: 8px">
-<asp:TextBox runat="server" type="text" id="TextBox5" title="Largura do Passeio" class="form-control" style="width: 82%" placeholder="Largura do Passeio"></asp:TextBox>
+<asp:TextBox runat="server" type="text" id="txtlargurapasseio" title="Largura do Passeio" class="form-control" style="width: 82%" placeholder="Largura do Passeio"></asp:TextBox>
 </div>
 </div>	
 
@@ -948,15 +938,9 @@
             }     
         });
 
-        $("#globespotter").click(function () {// icone que habilita opções de medição
-
-            window.open(returnURL(), '_new');
-        });
-
+        
         var lista=[];
         var pos = -1;
-        var marker1 = new Array();
-        var ilum = L.layerGroup();
 
         $("#openGlobe").click(function () {// icone que habilita opções de medição
             
@@ -965,7 +949,7 @@
             if(lat != "" && lng!="")
             {
                 var latlong = convertUTM(lat, lng);
-                openNearestImage(latlong[0] + ',' + latlong[1]);
+              
                 setValues();
                 chamaAjax("Geocode", "{ 'lat':'" + lat + "', 'lng':'" + lng + "'}", 1);
             }        
@@ -978,7 +962,22 @@
                 setDefault();
             });
             $("#infolista").click(function () {
-                buscarLista($('#<%=txtCodIluminacao.ClientID%>').val());  
+               
+             
+                    if ($('#<%=txtCodIluminacao.ClientID%>').val()) {
+                        var result = -1;
+                       
+                        result = buscaBinariaSimples(lista, lista.length, $('#<%=txtCodIluminacao.ClientID%>').val());
+                        alert(result)
+                        if (result != -1) {
+                            var latlong = convertUTM(lista[result][2], lista[result][3]);
+                            selectIluminacao(lista[result][0], lista[result][1], latlong[1], latlong[0], lista[result][4])
+                        }
+                        else {
+                            alert("Codigo não encontrado!")
+                        }
+                    }
+                
             });
             /**************************************************************************************************slider**/
             $('.bxslider').bxSlider({
@@ -1037,24 +1036,6 @@
                                       jsondata.COD_ILUM_FK
                                 ])
                             })
-                            ilum.clearLayers();
-                                 
-                            for (var i = 0; i < lista.length; i++) {
-                                if (lista[i][5] != "" && lista[i][5] != "null" && lista[i][5] != null && lista[i][5].toString() != "NULL" ) {
-                                      
-                                    var LamMarker = L.marker([lista[i][2], lista[i][3]], { id: i, icon: greenIcon }).on('click', markerOnClick).addTo(map);
-                                }
-                                else {
-                                            
-                                    var LamMarker = L.marker([lista[i][2], lista[i][3]], { id: i, icon: redIcon }).on('click', markerOnClick).addTo(map);
-                                }
-
-                                ilum.addLayer(LamMarker);
-
-                            }
-                            map.setView([-19.9246, -43.9614], 11)
-                            map.addLayer(ilum);
-         
                         },
                         failure: function (response) {
                             alert(response.d);
@@ -1074,19 +1055,13 @@
             /*----------------------------------Padrão tipo de braço e projeção do braço------------*/
     
             $("#<%=ddlTipoBraco.ClientID %>").change(function () {
-                alterarTipoBraco();
+                alterarTipoBraco($("#<%=txtCodIluminacao.ClientID %>"), $("#<%=ddlTipoBraco.ClientID %>"), $("#<%=txtProjBraco.ClientID %>"),  $("#<%=ddlTipoAlimentacao.ClientID %>"),  $("#<%=ddlTipoPoste.ClientID %>"), $("#<%=txtAltPoste.ClientID %>"));
             });
 
             function fonteLuminosa() {
                 tipoFonteLuminosa($("#<%=ddlTipoFonteLum.ClientID %>"),$("#<%=ddlPotFonteLum.ClientID %>") );
             }
 
-            $("#<%=ddlTipoBraco.ClientID %>").change(function () {
-                classe = document.getElementById('txtProjBraco').className;
-                if (classe == 'txtProjBraco') {
-                    document.getElementById('txtProjBraco').className = 'form-control2';
-                }
-            });
 
             /*-------------------------Padrao para o tipo e potencia de fonte luminosa--------------*/
             $("#<%=ddlTipoFonteLum.ClientID %>").change(function () {
@@ -1223,7 +1198,7 @@
                 
                     getinfoilum(codIlu, objectid);              
 
-                    openNearestImage(lng + ',' + lat);
+                  
                 }
 
                 function selectIluminacaoRefresh(codIlu, objectid, lat, lng, kmlid) {
@@ -1235,11 +1210,7 @@
                     $("#<%=txtLng.ClientID %>").val(lng);
 
                     getinfoilum(codIlu, objectid);
-                    setTimeout(function () {
-
-                        openNearestImage(lng + ',' + lat);
-
-                    }, 3500);
+                  
                 }
 
             function getRows(id) {
@@ -1321,13 +1292,13 @@
 
                 
                 function limpacampos() {
-                    limparCampos($('#<%=txtCodIluminacao.ClientID%>') , $('#<%=txtProjBraco.ClientID %>'), $('#<%=ddlTipoBraco.ClientID%>'), $('#<%=ddlTipoLum.ClientID%>'),$('#<%=ddlTipoFonteLum.ClientID%>'),$('#<%=ddlPotFonteLum.ClientID%>'),$('#<%=ddlQtdeFonteLum.ClientID%>'),$('#<%=txtPotTotFonteLum.ClientID%>'),$('#<%=txtCargInsTotUIP.ClientID%>'),$('#<%=ddlTipoReator.ClientID%>'),$('#<%=ddlTipoRele.ClientID%>'),$('#<%=ddlTipoAlimentacao.ClientID%>'),$('#<%=ddlTipoPoste.ClientID%>'),$('#<%=txtAltPoste.ClientID%>'),$('#<%=txtAltInstLum.ClientID%>'),$('#<%=txtReg.ClientID%>'), $('#<%=txtMun.ClientID%>'), $('#<%=txtBair.ClientID%>'),$('#<%=ddlClassIlum.ClientID%>'),$('#<%=txtLog.ClientID%>'),$('#<%=txtCEP.ClientID%>'),$('#<%=txtCodLog.ClientID%>'),$('#<%=txtNomeLocDestaq.ClientID%>'),$('#<%=ddlQtdeLum.ClientID%>'),$('#<%=txtMed.ClientID%>'),$("#<%=txtObservacao.ClientID %>"));         
+                    limparCampos($('#<%=txtCodIluminacao.ClientID%>'), $('#<%=txtProjBraco.ClientID %>'), $('#<%=ddlTipoBraco.ClientID%>'), $('#<%=ddlTipoLum.ClientID%>'), $('#<%=ddlTipoFonteLum.ClientID%>'), $('#<%=ddlPotFonteLum.ClientID%>'), $('#<%=ddlQtdeFonteLum.ClientID%>'), $('#<%=txtPotTotFonteLum.ClientID%>'), $('#<%=txtCargInsTotUIP.ClientID%>'), $('#<%=ddlTipoReator.ClientID%>'), $('#<%=ddlTipoRele.ClientID%>'), $('#<%=ddlTipoAlimentacao.ClientID%>'), $('#<%=ddlTipoPoste.ClientID%>'), $('#<%=txtAltPoste.ClientID%>'), $('#<%=txtAltInstLum.ClientID%>'), $('#<%=txtReg.ClientID%>'), $('#<%=txtMun.ClientID%>'), $('#<%=txtBair.ClientID%>'), $('#<%=ddlClassIlum.ClientID%>'), $('#<%=txtLog.ClientID%>'), $('#<%=txtCEP.ClientID%>'), $('#<%=txtCodLog.ClientID%>'), $('#<%=txtNomeLocDestaq.ClientID%>'), $('#<%=ddlQtdeLum.ClientID%>'), $('#<%=txtMed.ClientID%>'), $("#<%=txtObservacao.ClientID %>"), $("#<%=txtdistmeddoispostes.ClientID %>"), $("#<%=ddltipoposteacao.ClientID %>"), $("#<%=txtlarguravia.ClientID %>"), $("#<%=txtlarguracantcentral.ClientID %>"), $("#<%=txtlargurapasseio.ClientID %>"));         
                 }
 
                 /////////////////////////////////////////////////////////////limpar dados
                 function limpa()
                 {
-                    limpar($("#<%=txtProjBraco.ClientID %>"), $('#<%=ddlTipoBraco.ClientID%>'), $('#<%=ddlTipoLum.ClientID%>'), $('#<%=ddlTipoFonteLum.ClientID%>'), $('#<%=ddlPotFonteLum.ClientID%>'), $('#<%=ddlQtdeFonteLum.ClientID%>'), $('#<%=txtPotTotFonteLum.ClientID%>'), $('#<%=txtCargInsTotUIP.ClientID%>'), $('#<%=ddlTipoReator.ClientID%>'), $('#<%=ddlTipoRele.ClientID%>'), $('#<%=ddlTipoAlimentacao.ClientID%>'), $('#<%=ddlTipoPoste.ClientID%>'), $('#<%=txtAltPoste.ClientID%>'), $('#<%=txtAltInstLum.ClientID%>'), $('#<%=txtMun.ClientID%>'), $('#<%=txtReg.ClientID%>'), $('#<%=txtBair.ClientID%>'), $('#<%=ddlClassIlum.ClientID%>'), $('#<%=txtLog.ClientID%>'), $('#<%=txtCEP.ClientID%>'), $('#<%=txtCodLog.ClientID%>'), $('#<%=ddlIlumDest.ClientID%>'), $('#<%=txtNomeLocDestaq.ClientID%>'), $('#<%=ddlQtdeLum.ClientID%>'), $('#<%=txtMed.ClientID%>'), $('#<%=txtLat.ClientID%>'), $('#<%=txtLng.ClientID%>'), $('#deletarInfo'), $('#<%=LinkButtonAlterar.ClientID%>'), $('#<%=LinkButtonCadastrar.ClientID%>'), $("#<%=txtObservacao.ClientID %>"), $('#<%=hfCodilumPK.ClientID%>'), $('#<%=Msucesso.ClientID%>'), $('#<%=Malerta.ClientID%>'), $('#<%=Merro.ClientID%>') );
+                    limpar($("#<%=txtProjBraco.ClientID %>"), $('#<%=ddlTipoBraco.ClientID%>'), $('#<%=ddlTipoLum.ClientID%>'), $('#<%=ddlTipoFonteLum.ClientID%>'), $('#<%=ddlPotFonteLum.ClientID%>'), $('#<%=ddlQtdeFonteLum.ClientID%>'), $('#<%=txtPotTotFonteLum.ClientID%>'), $('#<%=txtCargInsTotUIP.ClientID%>'), $('#<%=ddlTipoReator.ClientID%>'), $('#<%=ddlTipoRele.ClientID%>'), $('#<%=ddlTipoAlimentacao.ClientID%>'), $('#<%=ddlTipoPoste.ClientID%>'), $('#<%=txtAltPoste.ClientID%>'), $('#<%=txtAltInstLum.ClientID%>'), $('#<%=txtMun.ClientID%>'), $('#<%=txtReg.ClientID%>'), $('#<%=txtBair.ClientID%>'), $('#<%=ddlClassIlum.ClientID%>'), $('#<%=txtLog.ClientID%>'), $('#<%=txtCEP.ClientID%>'), $('#<%=txtCodLog.ClientID%>'), $('#<%=ddlIlumDest.ClientID%>'), $('#<%=txtNomeLocDestaq.ClientID%>'), $('#<%=ddlQtdeLum.ClientID%>'), $('#<%=txtMed.ClientID%>'), $('#<%=txtLat.ClientID%>'), $('#<%=txtLng.ClientID%>'), $('#deletarInfo'), $('#<%=LinkButtonAlterar.ClientID%>'), $('#<%=LinkButtonCadastrar.ClientID%>'), $("#<%=txtObservacao.ClientID %>"), $('#<%=hfCodilumPK.ClientID%>'), $("#<%=txtdistmeddoispostes.ClientID %>"), $("#<%=ddltipoposteacao.ClientID %>"), $("#<%=txtlarguravia.ClientID %>"), $("#<%=txtlarguracantcentral.ClientID %>"), $("#<%=txtlargurapasseio.ClientID %>"), $('#<%=Msucesso.ClientID%>'), $('#<%=Malerta.ClientID%>'), $('#<%=Merro.ClientID%>') );
                 }
           
                 $(document).on('click', '#deletarInfo', function (e) {///FUNÇÃO PARA DELETAR DADOS DO POSTE
@@ -1501,61 +1472,32 @@
             
             /////////////////////AQUI COMEÇA O MAPA//////////////////////////////////////
 
-            var utm = 'PROJCS["SIRGAS_2000_UTM_Zone_@numfuso@hemisferio",GEOGCS["GCS_SIRGAS_2000",DATUM["D_SIRGAS_2000",SPHEROID["GRS_1980",6378137.0,298.257222101]],PRIMEM["Greenwich",0.0],UNIT["Degree",0.0174532925199433]],PROJECTION["Transverse_Mercator"],PARAMETER["False_Easting",500000.0],PARAMETER["False_Northing",10000000.0],PARAMETER["Central_Meridian",@nummc],PARAMETER["Scale_Factor",0.9996],PARAMETER["Latitude_Of_Origin",0.0],UNIT["Meter",1.0]]';
-            var wgs84 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
-            function convertUTM(WGSlat,WGSlng) {
-           
-                var MC = (6 * Math.floor(WGSlng / 6)) + 3;
-                var Fuso = Math.round(30 - (Math.abs(MC) / 6));
-                var calcfuso;
-                var checklat = WGSlat;
-            
-                if (checklat < 0) {
-                    calcfuso = utm.replace("@hemisferio", "S");
-                }
-                else {
-                    calcfuso = utm.replace("@hemisferio", "N");
-                }           
-                calcfuso = calcfuso.replace("@numfuso", Fuso);
-                calcfuso = calcfuso.replace("@nummc", MC);      
-           
+        var utm = 'PROJCS["SIRGAS_2000_UTM_Zone_@numfuso@hemisferio",GEOGCS["GCS_SIRGAS_2000",DATUM["D_SIRGAS_2000",SPHEROID["GRS_1980",6378137.0,298.257222101]],PRIMEM["Greenwich",0.0],UNIT["Degree",0.0174532925199433]],PROJECTION["Transverse_Mercator"],PARAMETER["False_Easting",500000.0],PARAMETER["False_Northing",10000000.0],PARAMETER["Central_Meridian",@nummc],PARAMETER["Scale_Factor",0.9996],PARAMETER["Latitude_Of_Origin",0.0],UNIT["Meter",1.0]]';
+        var wgs84 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
+        function convertUTM(WGSlat, WGSlng) {
 
-                var latlong = proj4(wgs84, calcfuso, [WGSlng, WGSlat]);
-                return latlong;
+            var MC = (6 * Math.floor(WGSlng / 6)) + 3;
+            var Fuso = Math.round(30 - (Math.abs(MC) / 6));
+            var calcfuso;
+            var checklat = WGSlat;
 
+            if (checklat < 0) {
+                calcfuso = utm.replace("@hemisferio", "S");
             }
+            else {
+                calcfuso = utm.replace("@hemisferio", "N");
+            }
+            calcfuso = calcfuso.replace("@numfuso", Fuso);
+            calcfuso = calcfuso.replace("@nummc", MC);
 
 
-            mapLink = '<a href="http://www.esri.com/">Esri</a>';
-            wholink = 'i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community';
+            var latlong = proj4(wgs84, calcfuso, [WGSlng, WGSlat]);
+            return latlong;
 
-            var esri = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-                attribution: '&copy; ' + mapLink + ', ' + wholink,
-                maxZoom: 22,
-            })
-
-            var grayscale = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
-                maxZoom:18
-            });
-
-            var mbAttr = 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
-                    '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
-                    'Imagery © <a href="http://mapbox.com">Mapbox</a>'
-            var mbUrl = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpandmbXliNDBjZWd2M2x6bDk3c2ZtOTkifQ._QA7i5Mpkd_m30IGElHziw';
-
-
-            streets = L.tileLayer(mbUrl, { id: 'mapbox.streets', attribution: mbAttr });
+        }
 
         
-            var ips = L.tileLayer('https://api.mapbox.com/styles/v1/aryacoletor/cisj1xgw800bf2xpbexbtfpkb/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoiYXJ5YWNvbGV0b3IiLCJhIjoiY2lzajFzZjN3MDF5aTJ1b2M0b25wZTl1byJ9.ZkPsVnXXgMrsW7DuZKGR6w');
-        
-
-            var map = L.map('map', {
-                layers: esri,
            
-            }).setView([-19.9246, -43.9614], 11);
-
 
             // getPontos("TESTE");
 
@@ -1566,284 +1508,47 @@
         
             /////////////////////////ICON
 
-            var greenIcon = L.icon({
-                iconUrl: 'lib/images/ckpoint_verde.png',
-                shadowUrl: 'lib/images/marker-shadow.png',
-
-                iconSize: [20, 35], // size of the icon
-                shadowSize: [25, 40], // size of the shadow
-                iconAnchor: [20, 35], // point of the icon which will correspond to marker's location
-                shadowAnchor: [4, 40],  // the same for the shadow
-                popupAnchor: [-3, -76] // point from which the popup should open relative to the iconAnchor
-            });
-            var redIcon = L.icon({
-                iconUrl: 'lib/images/ckpoint_vermelho.png',
-                shadowUrl: 'lib/images/marker-shadow.png',
-
-                iconSize: [20, 35], // size of the icon
-                shadowSize: [25, 40], // size of the shadow
-                iconAnchor: [20, 35], // point of the icon which will correspond to marker's location
-                shadowAnchor: [4, 40],  // the same for the shadow
-                popupAnchor: [-3, -76] // point from which the popup should open relative to the iconAnchor
-            });
-            var blueIcon = L.icon({
-                iconUrl: 'lib/images/ckpoint_azul.png',
-                shadowUrl: 'lib/images/marker-shadow.png',
-
-                iconSize: [20, 35], // size of the icon
-                shadowSize: [25, 40], // size of the shadow
-                iconAnchor: [20, 35], // point of the icon which will correspond to marker's location
-                shadowAnchor: [4, 40],  // the same for the shadow
-                popupAnchor: [-3, -76] // point from which the popup should open relative to the iconAnchor
-            });
 
             //////////////////////
       
-        
-            var baseMaps = {
-                "OpenStreetMap": grayscale,
-                "Ips Arya": ips,
-                "Streets": streets,
-                "Esri": esri
-
-            };
-       
-            var overlayMaps = {
-                "REMO ": ilum
                 
-
-            };
-            L.control.scale().addTo(map);
-            L.control.layers(baseMaps, overlayMaps).addTo(map);
 
             ///////////////////////////////////banco
 
-            function getPontos(prefix) {
-                $.ajax({
-                    url: '<%=ResolveUrl("~/Classes/Service.asmx/GetIlu") %>',
-                    type: "POST",
-                    data: "{ 'prefix': '" + prefix + "'}",
-                    contentType: "application/json; charset=utf-8",
-                    dataType: "json",
-                    success: function (data) {
-                        var parsed = $.parseJSON(data.d);
-                        var teste =""; 
-                        var i = 0;
-                        $.each(parsed, function (i, jsondata) {
-                            if (jsondata.COD_ILUM_FK != "" || jsondata.COD_ILUM_FK != "NULL")
-                            {
-                                teste = jsondata.COD_ILUM_FK +'|';
-                                var LamMarker = L.marker([jsondata.Y, jsondata.X], { id: i, icon: greenIcon }).on('click', markerOnClick).addTo(map);
-                            }
-                            else
-                            {
-                                var LamMarker = L.marker([jsondata.Y, jsondata.X], { id: i, icon: redIcon }).on('click', markerOnClick).addTo(map);
-                            }
-                            i++;
-                            //marker1.push(LamMarker);
-                            ilum.addLayer(LamMarker);
-                       
-                            //tableProp += '<tr><td style="white-space: nowrap;padding-left: 10px; padding-right: 10px; border-right: 1px solid #cccccc;">' + jsondata.NOME + '</td ><td style="white-space: nowrap;padding-left: 10px; padding-right: 10px; border-right: 1px solid #cccccc; ">' + jsondata.CPF + '</td ><td style="white-space: nowrap;"><center><span style="cursor: pointer;" onClick="removeProp(' + jsondata.COD_PROPRIETARIO_PK + ',' + jsondata.COD_EMPRESA_PK + ',\'' + jsondata.CPF + '\')" class="glyphicon glyphicon-remove "></span></center></td></tr>';
-                        });    
-               
-                        map.addLayer(ilum);
-
-                    },
-                    error: function (XHR, errStatus, errorThrown) {
-                        var err = JSON.parse(XHR.responseText);
-                        errorMessage = err.Message;
-                        alert(errorMessage);
-                    }
-                });
-            };
-
-
-            var oldLayer;///layer anterior
-            function markerOnClick(e) {
            
-                var latlong= convertUTM(lista[this.options.id][2],lista[this.options.id][3]);
-           
-                selectIluminacao(lista[this.options.id][0], lista[this.options.id][1], latlong[1], latlong[0], lista[this.options.id][4]);
 
-                $('#<%=txtCodIluminacao.ClientID%>').val(lista[this.options.id][0]);
 
-                var layer = e.target;
-                layer.setIcon(layer.options.icon = blueIcon);       
-                pos = this.options.id;
-            
-                if (oldLayer)
-                {
-                    if (oldLayer.options.id != layer.options.id)
-                    {
-                        if (lista[oldLayer.options.id][5] != null) {
-                            oldLayer.setIcon(layer.options.icon = greenIcon);
-                        }
-                        else {
-                            oldLayer.setIcon(layer.options.icon = redIcon);
-                        }
-
-                    }
-                }
-
-                oldLayer = layer;
- 
-                //alert(lista[this.options.id][3] + " eita " + lista[this.options.id][2]);
-                //LamMarker.setIcon(blueIcon);
-           
-                // alert("Ta vendo é por que ta funcionando." + this.options.id + " MISERAVIII " + e.latlng);
-  
-            } 
-
-            L.control.coordinates().addTo(map);
-            function setDefault()
-            {
-                defaultSet($('#<%=ddlTipoPoste.ClientID %>'), $('#<%=ddlPotFonteLum.ClientID %>'));
-            }
- 
-            function selectIluminacao(codIlu, objectid, lat, lng, kmlid) {
           
-                pos = -1;
-                $('#<%=txtCodIluminacao.ClientID%>').css("background", "#FFFFFF");
-           
-                setDefault();
-                limpa();
-                $('#<%=hfCodilumPK.ClientID%>').val(objectid);
-                $('#<%=hfkmlID.ClientID%>').val(kmlid);                  
-                $("#<%=txtLat.ClientID %>").val(lat);
-                $("#<%=txtLng.ClientID %>").val(lng);                
-                
-                getinfoilum(codIlu, objectid);              
-                openNearestImage(lng + ',' + lat);            
-            }
 
-            function getinfoilum(codIlu,iluPK) {
-               
-                $.ajax({
-                    url: '<%=ResolveUrl("~/Classes/service.asmx/GetInfo") %>',
-                    type: "POST",
-                    data: "{ 'ilumid': '" + iluPK + "'}",
-                    contentType: "application/json; charset=utf-8",
-                    dataType: "json",
-                    success: function (data2) {
+            
+        
 
-                        var parsed2 = $.parseJSON(data2.d);
-                        var fotos = ""
-                        var cont = 0;
-                        var layout = "<div class='bx-wrapper' style='max-width: 100%;'><div class='bx-viewport' style='width: 100%; overflow: hidden; position: relative; height: 530px;'>" +
-                                     "<ul class='bxslider' style='height: 467px; width: auto; position: relative;' >"
-                        var navegacao = "";
-
-                        $.each(parsed2, function (i, jsondata) {
-
-
-                            if (jsondata.COD_ILUM_FK != "" && jsondata.COD_ILUM_FK != "NULL" && jsondata.COD_ILUM_FK != null  )
-                            {
-                                setValues();
-                                selectiluinfo(jsondata.TIPO_BRACO, jsondata.PROJ_BRACO, jsondata.TIPO_LUMINARIA, jsondata.TIPO_FONTE_LUMINARIA, jsondata.POTENCIA_FONTE_LUMI, jsondata.QUANT_FONTES_LUMI, jsondata.POTENCIA_TOTAL_FONTE_LUMI, jsondata.CARGA_INST_TOTAL_UN_ILUM_PUB, jsondata.TIPO_REATOR, jsondata.TIPO_RELE, jsondata.TIPO_ALIMENTACAO, jsondata.TIPO_POSTE, jsondata.ALTURA_POSTE, jsondata.ALTURA_INST_LUMI, jsondata.MUNICIPIO, jsondata.REGIONAL, jsondata.BAIRRO, jsondata.CLASSE_ILUMI, jsondata.LOGRADOURO, jsondata.CEP,jsondata.COD_LOGRADOURO, jsondata.ILUM_DESTAQ, jsondata.NOME_LOCAL_DESTAQ, jsondata.QUANT_LUMINARIAS, jsondata.MEDICAO, jsondata.LAT, jsondata.LONG,jsondata.OBSERVACAO)
-                                $('#<%=LinkButtonCadastrar.ClientID%>').fadeOut();
-                                $('#<%=LinkButtonAlterar.ClientID%>').fadeIn(1000);
-                                $('#deletarInfo').fadeIn(1000);
-                            }
-                            else
-                            {           
-                                $('#deletarInfo').fadeOut();
-                                $('#<%=LinkButtonAlterar.ClientID%>').fadeOut();
-                                $('#<%=LinkButtonCadastrar.ClientID%>').fadeIn(1000);
-                            }
-
-                            cont = 0;
-                            for (var i = jsondata.COD_SEQ_INICIAL; i <= jsondata.COD_SEQ_FINAL; i++) {
-                                cont++
-                                if (cont == 1) {
-                                    fotos = fotos + "<li style='float: none; list-style: none; position: absolute; width: 467px; z-index: 50; display: block;'><a href='img/fotos/" + jsondata.EQUIPE + "/" + jsondata.LOCALIDADE + "/" + codIlu + "_" + cont + ".JPG' target='_blank'>" + "<img width=100% height=467px src=img/fotos/" + jsondata.EQUIPE + "/" + jsondata.LOCALIDADE + "/" + codIlu + "_" + cont + ".JPG></a></li>";
-                                }
-                                else {
-                                    fotos = fotos + "<li style='float: none; list-style: none; position: absolute; width: 467px; z-index: 0; display: block;'><a href=' img/fotos/" + jsondata.EQUIPE + "/" + jsondata.LOCALIDADE + "/" + codIlu + "_" + cont + ".JPG' target='_blank' >" + "<img width=100% height=467px src=img/fotos/" + jsondata.EQUIPE + "/" + jsondata.LOCALIDADE + "/" + codIlu + "_" + cont + ".JPG></a></li>";
-                                }
-                                navegacao = navegacao + " <div class='bx-pager-item'><a href='' data-slide-index='" + (cont - 1) + "' class='bx-pager-link active'>" + cont + "</a> </div>"
-                            }
-                            layout = layout + fotos + "</ul></div>" +
-                              "</div>";
-                        });
-
-                        ///////////////////////////////////////////////////// atualiza o slide
-
-                        document.getElementById('sliderblx').innerHTML = layout;
-                        $('.bxslider').bxSlider({
-                            mode: 'fade',
-                            captions: true
-                        });
-                        ///////////////////////////////////////////////////// atualiza o slide
-
-                    },
-                    failure: function (response) {
-                        
-                        alert(response.d);
-                    },
-                    error: function (response) {
-                        
-                        alert(response.d);
-                    }
-                });
-            }
 
             /*----------------------------------Padrão tipo de braço e projeção do braço------------*/
  
-            $("#<%=ddlTipoBraco.ClientID %>").change(function () {
-                alterarTipoBraco();
-            });
-
-        function fonteLuminosa() {
-            tipoFonteLuminosa($("#<%=ddlTipoFonteLum.ClientID %>"),$("#<%=ddlPotFonteLum.ClientID %>") );
-            }
-
+       
             /*-------------------------Padrao para o tipo e potencia de fonte luminosa--------------*/
-            $("#<%=ddlTipoFonteLum.ClientID %>").change(function () {
-                fonteLuminosa($("#<%=ddlTipoFonteLum.ClientID %>").val());
-            });
-
+           
             /*-------------------------------------Tipo relé e tipo reator baseado no tipo de luminária---------------------------*/
-            $("#<%=ddlTipoLum.ClientID %>").change(function () {
-                lumReles($("#<%=ddlTipoLum.ClientID %>"), $("#<%=ddlTipoReator.ClientID %>"), $("#<%=ddlTipoRele.ClientID %>"))
-            });
+        
 
 
-            $("#<%=ddlTipoRele.ClientID %>").change(function () {
-                trocaRele($("#<%=ddlTipoRele.ClientID %>"), $("#<%=ddlTipoReator.ClientID %>"))    
-            });
+           
 
-            $("#<%=ddlTipoReator.ClientID %>").change(function () {
-                trocaReator($("#<%=ddlTipoRele.ClientID %>"), $("#<%=ddlTipoReator.ClientID %>"))
-            });
- 
+           
 
             /*-------------------------Padrao para Tipo de braço ou poste com tipo de alimentação-------------------------*/
-            $("#<%=ddlTipoPoste.ClientID %>").change(function () {
-                trocarPosteEAli($("#<%=ddlTipoPoste.ClientID %>"), $("#<%=ddlTipoAlimentacao.ClientID %>"));   
-            });
+           
 
             /*---------------------------------Padrao Quantidade de Luminarias e quantidade de fontes luminosas-------------------------*/
 
-            $("#<%=ddlQtdeLum.ClientID %>").change(function () {
-                trocarLum($("#<%=ddlQtdeLum.ClientID %>"), $("#<%=ddlQtdeFonteLum.ClientID %>"));
-            });
- 
-            $("#<%=ddlQtdeFonteLum.ClientID %>").change(function () {
-                if ($("#<%=ddlQtdeFonteLum.ClientID %>").val() < $("#<%=ddlQtdeLum.ClientID %>").val()) {
-                    $("#<%=ddlQtdeLum.ClientID %>").val("-1");
-                }
-            });
+           
+           
             
             
-            function limpacampos() {
-                limparCampos($('#<%=txtCodIluminacao.ClientID%>') , $('#<%=txtProjBraco.ClientID %>'), $('#<%=ddlTipoBraco.ClientID%>'), $('#<%=ddlTipoLum.ClientID%>'),$('#<%=ddlTipoFonteLum.ClientID%>'),$('#<%=ddlPotFonteLum.ClientID%>'),$('#<%=ddlQtdeFonteLum.ClientID%>'),$('#<%=txtPotTotFonteLum.ClientID%>'),$('#<%=txtCargInsTotUIP.ClientID%>'),$('#<%=ddlTipoReator.ClientID%>'),$('#<%=ddlTipoRele.ClientID%>'),$('#<%=ddlTipoAlimentacao.ClientID%>'),$('#<%=ddlTipoPoste.ClientID%>'),$('#<%=txtAltPoste.ClientID%>'),$('#<%=txtAltInstLum.ClientID%>'),$('#<%=txtReg.ClientID%>'),$('#<%=txtBair.ClientID%>'),$('#<%=ddlClassIlum.ClientID%>'),$('#<%=txtLog.ClientID%>'),$('#<%=txtCEP.ClientID%>'),$('#<%=txtCodLog.ClientID%>'),$('#<%=txtNomeLocDestaq.ClientID%>'),$('#<%=ddlQtdeLum.ClientID%>'),$('#<%=txtMed.ClientID%>'),$("#<%=txtObservacao.ClientID %>"));         
-            }
-
+            
             /////////////////////////////////////////////////////////////limpar dados
-            function limpa()
-            {
-                limpar($("#<%=txtProjBraco.ClientID %>"), $('#<%=ddlTipoBraco.ClientID%>'), $('#<%=ddlTipoLum.ClientID%>'), $('#<%=ddlTipoFonteLum.ClientID%>'), $('#<%=ddlPotFonteLum.ClientID%>'), $('#<%=ddlQtdeFonteLum.ClientID%>'), $('#<%=txtPotTotFonteLum.ClientID%>'), $('#<%=txtCargInsTotUIP.ClientID%>'), $('#<%=ddlTipoReator.ClientID%>'), $('#<%=ddlTipoRele.ClientID%>'), $('#<%=ddlTipoAlimentacao.ClientID%>'), $('#<%=ddlTipoPoste.ClientID%>'), $('#<%=txtAltPoste.ClientID%>'), $('#<%=txtAltInstLum.ClientID%>'), $('#<%=txtMun.ClientID%>'), $('#<%=txtReg.ClientID%>'), $('#<%=txtBair.ClientID%>'), $('#<%=ddlClassIlum.ClientID%>'), $('#<%=txtLog.ClientID%>'), $('#<%=txtCEP.ClientID%>'), $('#<%=txtCodLog.ClientID%>'), $('#<%=ddlIlumDest.ClientID%>'), $('#<%=txtNomeLocDestaq.ClientID%>'), $('#<%=ddlQtdeLum.ClientID%>'), $('#<%=txtMed.ClientID%>'), $('#<%=txtLat.ClientID%>'), $('#<%=txtLng.ClientID%>'), $('#deletarInfo'), $('#<%=LinkButtonAlterar.ClientID%>'), $('#<%=LinkButtonCadastrar.ClientID%>'), $("#<%=txtObservacao.ClientID %>"), $('#<%=hfCodilumPK.ClientID%>'), $('#<%=Msucesso.ClientID%>'), $('#<%=Malerta.ClientID%>'), $('#<%=Merro.ClientID%>') );
-            }
+          
             
         </script>
     

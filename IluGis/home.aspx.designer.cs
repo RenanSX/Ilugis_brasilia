@@ -328,49 +328,49 @@ namespace IluGis {
         protected global::System.Web.UI.WebControls.TextBox txtCargInsTotUIP;
         
         /// <summary>
-        /// TextBox2 control.
+        /// txtdistmeddoispostes control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox TextBox2;
+        protected global::System.Web.UI.WebControls.TextBox txtdistmeddoispostes;
         
         /// <summary>
-        /// DropDownList1 control.
+        /// ddltipoposteacao control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList DropDownList1;
+        protected global::System.Web.UI.WebControls.DropDownList ddltipoposteacao;
         
         /// <summary>
-        /// TextBox3 control.
+        /// txtlarguravia control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox TextBox3;
+        protected global::System.Web.UI.WebControls.TextBox txtlarguravia;
         
         /// <summary>
-        /// TextBox4 control.
+        /// txtlarguracantcentral control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox TextBox4;
+        protected global::System.Web.UI.WebControls.TextBox txtlarguracantcentral;
         
         /// <summary>
-        /// TextBox5 control.
+        /// txtlargurapasseio control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox TextBox5;
+        protected global::System.Web.UI.WebControls.TextBox txtlargurapasseio;
         
         /// <summary>
         /// txtPerdaPotTotEquipAux control.

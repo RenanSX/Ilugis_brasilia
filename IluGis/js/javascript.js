@@ -2,7 +2,7 @@ document.write(unescape("%3Cscript src='japi/API.js' type='text/javascript'%3E%3
 document.write(unescape("%3Cscript src='japi/api-common.js' type='text/javascript'%3E%3C/script%3E"));
 
 
-var codilum, projbraco, tipobraco, tipolum, tipofontelum, potfontelum, qtdefontelum, pottotfontelum, carginsttotuip, tiporeator, tiporele, tipoalimentacao, tipoposte, altposte, altinstlum, mun, reg, bair, classilum, log, cep, codlog, ilumdest, qtdelum, med, observacao, nomelocaldestaq, lat, lng;
+var codilum, projbraco, tipobraco, tipolum, tipofontelum, potfontelum, qtdefontelum, pottotfontelum, carginsttotuip, tiporeator, tiporele, tipoalimentacao, tipoposte, altposte, altinstlum, mun, reg, bair, classilum, log, cep, codlog, ilumdest, qtdelum, med, observacao, nomelocaldestaq, lat, lng, distmeddoispostes, tipoposteacao, larguravia, larguracantcentral, largurapasseio;
 
 function codilumset(value){
 	this.codilum = value;
@@ -92,6 +92,27 @@ function lngset(value){
 	this.lng = value;
 }
 
+function distmeddoispostesset(value){
+    this.distmeddoispostes = value;
+}
+
+function tipoposteacaoset(value){
+    this.tipoposteacao = value;
+}
+
+function larguraviaset(value){
+    this.larguravia = value;
+}
+
+function larguracantcentralset(value){
+    this.larguracantcentral = value;
+}
+
+function largurapasseioset(value) {
+    this.largurapasseio = value;
+}
+
+
 function teste(projbraco){
 	alert(projbraco.val());
 	//var projecaobraco = document.getElementById();
@@ -136,97 +157,97 @@ function travarTela(telaModeToggle) {
                 $('globespotter_fotos').css({ 'overflow': 'visible' });
             }
             }
-			
-function  buscaBinariaSimples(v, n, x) {
-                
-                achou = false;
-                var L = 1;
-                var  R = n;
-                var M= 0;
-                var ultimo = n-1;
-               
-                while (!achou && L < R) {
-                    if (x == v[0][0])
-                    {
-                        M = 0;
-                        achou = true;
-                        return M
-                        break;
-                    }
 
-                    M = parseInt((L + R) / 2);
-                    if (x == v[M][0]) {
-                        return M;
-                        achou = true;
-                    } else if (x < v[M][0]) {
-                        R = M
-                    } else {
-                        L = M + 1
-                    }
-                }
-                return -1;
-                   
+    function buscaBinariaSimples(v, n, x) {
+       
+        achou = false;
+        var L = 1;
+        var R = n;
+        var M = 0;
+        var ultimo = n - 1;
 
-            }   
+        while (!achou && L < R) {
+        
+            if (x == v[0][0]) {
+                M = 0;
+                achou = true;
+                return M
+                break;
+            }
 
-function alterarTipoBraco(){
-	if ($("#<%=hfCodilumPK.ClientID %>").val() != "")
+            M = parseInt((L + R) / 2);
+            if (x == v[M][0]) {
+                achou = true;
+                return M;
+            } else if (x < v[M][0]) {
+                R = M
+            } else {
+                L = M + 1
+            }
+        }
+        return -1;
+
+
+    }
+
+    function alterarTipoBraco(codilum, tipobraco, projbraco, tipoalimentacao, tipoposte, altposte) {
+        if (codilum.val() != "")
                  {                   
-                     if ($("#<%=ddlTipoBraco.ClientID %>").val() == "Curto") {
-                         if ($("#<%=ddlTipoPoste.ClientID %>").val() != "Metalico") {
-                             $("#<%=txtProjBraco.ClientID %>").val("1.16");
-                             $("#<%=ddlTipoAlimentacao.ClientID %>").val("Aereo");
+	    if (tipobraco.val() == "Curto") {
+	        if (tipobraco.val() != "Metalico") {
+	            projbraco.val("1.16");
+	            tipoalimentacao.val("Aereo");
                          }else {
-                             $("#<%=txtProjBraco.ClientID %>").val("1.16");
-                             $("#<%=ddlTipoAlimentacao.ClientID %>").val("Aereo");
-                             $("#<%=ddlTipoPoste.ClientID %>").val("-1");
+	            projbraco.val("1.16");
+	            tipoalimentacao.val("Aereo");
+	            tipoposte.val("-1");
                          }
                      }
-                     else if ($("#<%=ddlTipoBraco.ClientID %>").val() == "Medio") {
-                         if ($("#<%=ddlTipoPoste.ClientID %>").val() != "Metalico") {
-                             $("#<%=txtProjBraco.ClientID %>").val("2.92");
-                             $("#<%=ddlTipoAlimentacao.ClientID %>").val("Aereo");
+	    else if (tipobraco.val() == "Medio") {
+	        if (tipoposte.val() != "Metalico") {
+                             projbraco.val("2.92");
+                             tipoalimentacao.val("Aereo");
                          }else {
-                             $("#<%=txtProjBraco.ClientID %>").val("2.92");
-                             $("#<%=ddlTipoAlimentacao.ClientID %>").val("Aereo");
-                             $("#<%=ddlTipoPoste.ClientID %>").val("-1");
+                             projbraco.val("2.92");
+                             tipoalimentacao.val("Aereo");
+                             tipoposte.val("-1");
                          }
                      }
-                     else if ($("#<%=ddlTipoBraco.ClientID %>").val() == "Medio Pesado") {
-                         if ($("#<%=ddlTipoPoste.ClientID %>").val() != "Metalico") {
-                             $("#<%=txtProjBraco.ClientID %>").val("3.85");
-                             $("#<%=ddlTipoAlimentacao.ClientID %>").val("Aereo");
+	    else if (tipobraco.val() == "Medio Pesado") {
+	        if (tipoposte.val() != "Metalico") {
+                             projbraco.val("3.85");
+                             tipoalimentacao.val("Aereo");
                          }else {
-                             $("#<%=txtProjBraco.ClientID %>").val("3.85");
-                             $("#<%=ddlTipoAlimentacao.ClientID %>").val("Aereo");
-                             $("#<%=ddlTipoPoste.ClientID %>").val("-1");
+                             projbraco.val("3.85");
+                             tipoalimentacao.val("Aereo");
+                             tipoposte.val("-1");
                          }
                      }
-                     else if ($("#<%=ddlTipoBraco.ClientID %>").val() == "Longo") {
-                         if ($("#<%=ddlTipoPoste.ClientID %>").val() != "Metalico") {
-                             $("#<%=txtProjBraco.ClientID %>").val("5.60");
-                             $("#<%=txtAltPoste.ClientID %>").val("12");
-                             $("#<%=ddlTipoAlimentacao.ClientID %>").val("Aereo");
+	    else if (tipobraco.val() == "Longo") {
+	        if (tipoposte.val() != "Metalico") {
+                             projbraco.val("5.60");
+                             altposte.val("12");
+                             tipoalimentacao.val("Aereo");
                          }else {
-                             $("#<%=txtProjBraco.ClientID %>").val("5.60");
-                             $("#<%=txtAltPoste.ClientID %>").val("12");
-                             $("#<%=ddlTipoAlimentacao.ClientID %>").val("Aereo");
-                             $("#<%=ddlTipoPoste.ClientID %>").val("-1");
+                             projbraco.val("5.60");
+                             altposte.val("12");
+                             tipoalimentacao.val("Aereo");
+                             tipoposte.val("-1");
                          }
                      }
-                     else if ($("#<%=ddlTipoBraco.ClientID %>").val() == "Especial") {
-                         $("#<%=ddlTipoPoste.ClientID %>").val("Metalico");
-                         $("#<%=ddlTipoAlimentacao.ClientID %>").val("Subterraneo");
-                         $("#<%=txtProjBraco.ClientID %>").val("");
+	    else if (tipobraco.val() == "Especial") {
+	        tipoposte.val("Metalico");
+                         tipoalimentacao.val("Subterraneo");
+                         projbraco.val("");
                      }
-                     else if ($("#<%=ddlTipoBraco.ClientID %>").val() == "Sem braco") {
-                         $("#<%=ddlTipoPoste.ClientID %>").val("Metalico")
-                         $("#<%=txtProjBraco.ClientID %>").val("");
-                         $("#<%=ddlTipoAlimentacao.ClientID %>").val("Subterraneo");
+	    else if (tipobraco.val() == "Sem braco") {
+	        tipoposte.val("Metalico")
+                         projbraco.val("");
+                         tipoalimentacao.val("Subterraneo");
                      }
-                     else if ($("#<%=ddlTipoBraco.ClientID %>").val() == "-1") {
-                         $("#<%=ddlTipoAlimentacao.ClientID %>").val("-1");
-                         $("#<%=txtProjBraco.ClientID %>").val("");
+	    else if (tipobraco.val() == "-1") {
+	                     tipoalimentacao.val("-1");
+                         projbraco.val("");
                      }
                  }
 }			
@@ -279,24 +300,9 @@ function tipoFonteLuminosa(tipofontelum, potfontelum){
 	}
 }
 
-function buscarLista(codilum){
-	if (codilum)
-            {
-                var result = -1;
-                result = buscaBinariaSimples(lista, lista.length, codilum);
-               
-                if (result != -1)
-                {                  
-                    var latlong = convertUTM(lista[result][2], lista[result][3]);
-                    selectIluminacao(lista[result][0], lista[result][1], latlong[1], latlong[0], lista[result][4])
-                }
-                else {
-                    alert("Codigo não encontrado!")
-                }  
-            }
-}
 
-function limparCampos(codilum, projbraco, tipobraco, tipolum, tipofontelum, potfontelum, qtdefontelum, pottotfontelum, carginsttotuip, tiporeator, tiporele, tipoalimentacao, tipoposte, altposte, altinstlum, mun, reg, bair, classilum, log, cep, codlog, ilumdest, qtdelum, med, observacao ){
+
+function limparCampos(codilum, projbraco, tipobraco, tipolum, tipofontelum, potfontelum, qtdefontelum, pottotfontelum, carginsttotuip, tiporeator, tiporele, tipoalimentacao, tipoposte, altposte, altinstlum, mun, reg, bair, classilum, log, cep, codlog, ilumdest, qtdelum, med, observacao, distmeddoispostes, tipoposteacao, larguravia, larguracantcentral, largurapasseio) {
 	codilum.css("background", "#FFFFFF");
 	projbraco.val("");
 	tipobraco.val("-1");
@@ -323,7 +329,11 @@ function limparCampos(codilum, projbraco, tipobraco, tipolum, tipofontelum, potf
 	qtdelum.val("-1");
 	med.val("");
 	observacao.val("");
-
+	distmeddoispostes.val("");
+	tipoposteacao.val("-1");
+	larguravia.val("");
+	larguracantcentral.val("");
+	largurapasseio.val("");
 }
 
 function defaultSet(tipoposte, potfontelum){
@@ -424,7 +434,7 @@ function comumRodovia(tipobraco, altposte, qtdelum, tipoposte, qtdefontelum, tip
                 mun.val("Belo Horizonte");
 }
 
-function limpar(projbraco, tipobraco, tipolum, tipofontelum, potfontelum, qtdefontelum, pottotfontelum, carginsttotuip, tiporeator, tiporele, tipoalimentacao, tipoposte, altposte, altinstlum, mun, reg, bair, classilum, log, cep, codlog, ilumdest, nomelocaldestaq, qtdelum, med, lat, lng, deletarinfo, buttonalterar, buttoncadastrar, obs, codilumpk, msucesso, malerta, merro ){
+function limpar(projbraco, tipobraco, tipolum, tipofontelum, potfontelum, qtdefontelum, pottotfontelum, carginsttotuip, tiporeator, tiporele, tipoalimentacao, tipoposte, altposte, altinstlum, mun, reg, bair, classilum, log, cep, codlog, ilumdest, nomelocaldestaq, qtdelum, med, lat, lng, deletarinfo, buttonalterar, buttoncadastrar, obs, codilumpk, distmeddoispostes, tipoposteacao, larguravia, larguracantcentral, largurapasseio, msucesso, malerta, merro){
 	projbraco.val("");
 	tipobraco.val("-1");               
 	tipolum.val("-1");                
@@ -457,6 +467,11 @@ function limpar(projbraco, tipobraco, tipolum, tipofontelum, potfontelum, qtdefo
 	buttoncadastrar.fadeIn(1000);
 	obs.val("");
 	codilumpk.val("");
+	distmeddoispostes.val("");
+	tipoposteacao.val("-1");
+	larguravia.val("");
+	larguracantcentral.val("");
+	largurapasseio.val("");
  setTimeout(function () {
 	 msucesso.fadeOut();
 	 malerta.fadeOut();
@@ -569,7 +584,7 @@ function limpar(projbraco, tipobraco, tipolum, tipofontelum, potfontelum, qtdefo
 			this.tipolum.val(tipolum);
 		}
 		if (tipofontelum) {
-			fonteLuminosa(tipofontelum);
+			//fonteLuminosa(tipofontelum);
 			this.tipofontelum.val(tipofontelum);
 		}
 		if (potfontelum) {
