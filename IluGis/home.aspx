@@ -63,6 +63,11 @@
 
       <!-- Just don’t want to repeat this prefix in every img[src] -->
       <script type="text/javascript">
+          var panoramaG;
+          var mapG;
+          var indicatorG;
+          var mapCG;
+
           function distance(p1, p2) {
               var R = 6371010;
               var dLat = (Math.PI / 180.0) * ((p2.lat() - p1.lat()));
@@ -154,6 +159,7 @@
               line.setMap(map);
 
               google.maps.event.addListener(panorama, 'position_changed', function () {
+                    
                   latD = panorama.getPosition().lat() - mapCtr.lat();
                   lngD = panorama.getPosition().lng() - mapCtr.lng();
                   indicator.setPosition(new google.maps.LatLng((latD + indicator.getPosition().lat()), (lngD + indicator.getPosition().lng())));
@@ -165,6 +171,7 @@
                   document.location.hash = mapCtr.toUrlValue() + "/" + indicator.getPosition().toUrlValue() + "/" + Math.round(dang) + "/0";
               });
               google.maps.event.addListener(indicator, 'dragend', function () {
+                    
                   dist = distance(indicator.getPosition(), mapCtr)
                   panorama.setPov({
                       heading: bearing(mapCtr, indicator.getPosition()),
@@ -175,6 +182,7 @@
 
               });
               google.maps.event.addListener(panorama, 'pov_changed', function () {
+                     
                   angle = panorama.getPov().heading;
                   pitch = panorama.getPov().pitch;
                   nP = movePoint(mapCtr, angle, dist);
@@ -182,6 +190,8 @@
                   posarr.setAt(1, indicator.getPosition());
                   calcAll();
               });
+
+             
 
               function calcAll() {
 
@@ -244,7 +254,14 @@
               });
 
 
+              panoramaG = panorama;
+              mapG = map;
+              indicatorG = indicator;
+              mapCG = mapCtr;
+              pitchG = pitch;
+
           }
+          
 </script>
             
 </asp:Content>
@@ -308,7 +325,7 @@
             <asp:ListItem Text ="OESTE 04" Value = "OESTE04"></asp:ListItem>   
             <asp:ListItem Text ="PAMPULHA 01" Value = "PAMPULHA01"></asp:ListItem>
             <asp:ListItem Text ="PAMPULHA 02" Value = "PAMPULHA02"></asp:ListItem> 
-            <asp:ListItem Text ="PAMPULHA 02" Value = "PAMPULHA02"></asp:ListItem> 
+            <asp:ListItem Text ="PAMPULHA 03" Value = "PAMPULHA03"></asp:ListItem> 
             <asp:ListItem Text ="VENDA NOVA 01" Value = "VENDANOVA01"></asp:ListItem> 
             <asp:ListItem Text ="VENDA NOVA 02" Value = "VENDANOVA02"></asp:ListItem>          
             </asp:DropDownList>
@@ -781,7 +798,7 @@
 
         <div ID="longitude" class="col-md-2 col-sm-2" style="margin-bottom: 8px">
                 <asp:TextBox Style="width: 82%" type="text" placeholder="Longitude" class="form-control input-sm" ID="txtLng" title="Longitude" runat="server" name="Longitude"></asp:TextBox>
-                <button type="button" id="openGlobe" style="height: 29px;">
+                <button type="button" id="openGlobe"  style="height: 29px;">
                 <span class="glyphicon glyphicon-map-marker" aria-hidden="true"></span>
                 </button>
          </div>
@@ -957,6 +974,22 @@
             var lng = $('#<%=txtLng.ClientID%>').val();
             if(lat != "" && lng!="")
             {
+                var ip = new google.maps.LatLng(lat, lng);
+               
+                panoramaG.setPosition(new google.maps.LatLng(lat, lng));
+                var positionPanorama = new google.maps.LatLng(panoramaG.getPosition().lat(), panoramaG.getPosition().lng());
+                panoramaG.setPov({
+                    heading: bearing(positionPanorama, ip),
+                    pitch: pitchG
+                });
+               
+                indicatorG.setPosition(ip);
+                var info = document.location.href.replace("#", "") + "#" + ip.toUrlValue() + "/" + ip.toUrlValue() + "/" + Math.round(bearing(positionPanorama ,ip)) + "/0";
+                $("#linkloc").val(info);
+                mapG.setCenter(ip);
+
+                $("#distance").text((Math.round(distance(positionPanorama,ip) * 100) / 100));
+                initialize();
                 var latlong = convertUTM(lat, lng);
               
                 setValues();
