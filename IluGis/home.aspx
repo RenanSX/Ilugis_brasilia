@@ -907,7 +907,12 @@
             medset($('#<%=txtMed.ClientID%>'));
             observacaoset($('#<%=txtObservacao.ClientID%>'));
             latset($('#<%=txtLat.ClientID%>'));
-            lngset($('#<%=txtLng.ClientID%>'));    
+            lngset($('#<%=txtLng.ClientID%>'));   
+            distmeddoispostesset( $("#<%=txtdistmeddoispostes.ClientID %>"));
+            tipoposteacaoset($("#<%=ddltipoposteacao.ClientID %>"));
+            larguraviaset($("#<%=txtlarguravia.ClientID %>"));
+            larguracantcentralset($("#<%=txtlarguracantcentral.ClientID %>"));
+            largurapasseioset($("#<%=txtlargurapasseio.ClientID %>")); 
         }
 
         function chamarValidaForm() {
