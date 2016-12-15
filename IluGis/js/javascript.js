@@ -122,6 +122,56 @@ function teste(projbraco){
 function teste2(){
 	alert('Carai');
 }
+function setViewThe(lat, lng) {
+
+    google.maps.event.clearListeners(panorama, 'position_changed', change_position);
+    google.maps.event.clearListeners(indicator, 'dragend', change_dragend);
+    google.maps.event.clearListeners(panorama, 'pov_changed', change_pov);
+
+    mapCtr = new google.maps.LatLng((lat * 1), (lng * 1));
+    indicator.setPosition(mapCtr);
+    panorama.setPosition(mapCtr);
+    panorama.setPov({
+        heading: bearing(mapCtr, indicator.getPosition()),
+        pitch: pitch
+    });
+
+
+    var service = new google.maps.StreetViewService;
+    
+    service.getPanoramaByLocation(panorama.getPosition(), 50, function (panoData) {
+        if (panoData != null) {
+            var panoCenter = panoData.location.latLng;
+
+            var heading = google.maps.geometry.spherical.computeHeading(panoCenter, mapCtr);
+
+            var pov = panorama.getPov();
+            pov.heading = heading;
+            panorama.setPov(pov);
+
+
+            //var marker = new google.maps.Marker({
+            //    map: panorama,
+            //    position: mapCtr
+            //});
+            // var pam = new google.maps.LatLng((panoCenter.lat())*1, (panoCenter.lng())*1);
+            dist = distance(mapCtr, panoCenter)
+
+        } else {
+            // no streetview found :(
+            alert('não encontrado');
+        }
+
+    });
+
+    map.setCenter(indicator.getPosition())
+    document.location.hash = mapCtr.toUrlValue() + "/" + indicator.getPosition().toUrlValue() + "/" + Math.round(dang) + "/0";
+
+    google.maps.event.addListener(panorama, 'position_changed', change_position);
+    google.maps.event.addListener(indicator, 'dragend', change_dragend);
+    google.maps.event.addListener(panorama, 'pov_changed', change_pov);
+
+}
 
 function enable()
         {

@@ -8,7 +8,7 @@
     <script src="js/sliderblx/jquery.bxslider.min.js"></script>
    <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.3.15/proj4.js"></script>
     <link href="css/button.css" rel="stylesheet" />
-    <script type="text/javascript" src="js/javascript.js"></script>
+    
 
     <!----TAB- agora foi---->
  <%--   <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.1/jquery.min.js"></script>--%>
@@ -18,6 +18,7 @@
 
       <link href="css/theodolite.css" rel="stylesheet" />   
     <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?key=AIzaSyA_2F4f39ncWIbzriIlpHSQXe5JRpAkvEU&sensor=false&libraries=geometry"></script>
+    <script type="text/javascript" src="js/javascript.js"></script>
     <style>
         /*FUNDO RGB: 424263   2A2A3F*/
         /*COLOR GLOBESPOTTER*/
@@ -1003,73 +1004,7 @@
             var lng = $('#<%=txtLng.ClientID%>').val();
             if(lat != "" && lng!="")
             {
-                google.maps.event.clearListeners(panorama, 'position_changed', change_position);
-                google.maps.event.clearListeners(indicator, 'dragend', change_dragend);
-                google.maps.event.clearListeners(panorama, 'pov_changed', change_pov);
-
-                mapCtr = new google.maps.LatLng((lat * 1), (lng * 1));
-                indicator.setPosition(mapCtr);
-                panorama.setPosition(mapCtr);
-                panorama.setPov({
-                    heading: bearing(mapCtr, indicator.getPosition()),
-                    pitch: pitch
-                });
-                
-                console.log('head:' + bearing(mapCtr, indicator.getPosition()));
-
-                console.log('mapCrt:' + mapCtr.lat() + ',' + mapCtr.lng());
-
-                console.log('position: ' + panorama.getPosition().lat() + ',' + panorama.getPosition().lng() + '---- location: ' + panorama.getLocation().latLng);
-              
-
-               // console.log('latlngD:' + latD + ',' + lngD);
-                console.log('indicator: ' + indicator.getPosition())
                
-                ///////////////////////////////
-                /*angle = panorama.getPov().heading;
-                pitch = panorama.getPov().pitch;
-                nP = movePoint(mapCtr, angle, dist);
-                indicator.setPosition(new google.maps.LatLng(nP[0], nP[1]));
-                posarr.setAt(1, indicator.getPosition());
-                latD = panorama.getPosition().lat() - mapCtr.lat();
-                lngD = panorama.getPosition().lng() - mapCtr.lng();
-                //////////////////////////////////
-                indicator.setPosition(new google.maps.LatLng((latD + indicator.getPosition().lat()), (lngD + indicator.getPosition().lng())));
-                console.log('indicator:' + indicator.getPosition());*/
-
-                var service = new google.maps.StreetViewService;
-
-                service.getPanoramaByLocation(panorama.getPosition(), 50, function (panoData) {
-                    if (panoData != null) {
-                        var panoCenter = panoData.location.latLng;
-
-                        var heading = google.maps.geometry.spherical.computeHeading(panoCenter, mapCtr);
-
-                        var pov = panorama.getPov();
-                        pov.heading = heading;
-                        panorama.setPov(pov);
-                        
-
-                        //var marker = new google.maps.Marker({
-                        //    map: panorama,
-                        //    position: mapCtr
-                        //});
-                       // var pam = new google.maps.LatLng((panoCenter.lat())*1, (panoCenter.lng())*1);
-                        dist = distance(mapCtr, panoCenter)
-                        console.log('distancia: ' + dist + '----panocenter:' + panoCenter.lat() + ',' + panoCenter.lng()+ '-----mapCtr:' + mapCtr);
-                    } else {
-                        // no streetview found :(
-                        alert('not found'); 
-                    }
-                    
-                });
-               
-               map.setCenter(indicator.getPosition())
-               document.location.hash = mapCtr.toUrlValue() + "/" + indicator.getPosition().toUrlValue() + "/" + Math.round(dang) + "/0";
-
-               google.maps.event.addListener(panorama, 'position_changed', change_position);
-               google.maps.event.addListener(indicator, 'dragend', change_dragend);
-               google.maps.event.addListener(panorama, 'pov_changed', change_pov);
 
                 var latlong = convertUTM(lat, lng);
               
@@ -1093,8 +1028,8 @@
                         result = buscaBinariaSimples(lista, lista.length, $('#<%=txtCodIluminacao.ClientID%>').val());
                        
                         if (result != -1) {
-                            var latlong = convertUTM(lista[result][2], lista[result][3]);
-                            selectIluminacao(lista[result][0], lista[result][1], latlong[1], latlong[0], lista[result][4])
+                            //var latlong = convertUTM(lista[result][2], lista[result][3]);
+                            selectIluminacao(lista[result][0], lista[result][1], lista[result][2], lista[result][3], lista[result][4])
                         }
                         else {
                             alert("Codigo não encontrado!")
@@ -1113,9 +1048,9 @@
             if (isPostBack().toString() == "True") {///RELOAD DA PAGINA FAZER
                 chamaAjax("GetLista", "{ 'localidade': '" + $("#<%=ddllocalidade.ClientID %>").val() + "'}", 2);
            
-                var latlong = convertUTM($('#<%=txtLat.ClientID%>').val(), $('#<%=txtLng.ClientID%>').val());
+               <%-- var latlong = convertUTM($('#<%=txtLat.ClientID%>').val(), $('#<%=txtLng.ClientID%>').val());--%>
   
-                selectIluminacaoRefresh($('#<%=txtCodIluminacao.ClientID%>').val(), $('#<%=hfCodilumPK.ClientID%>').val(), latlong[1], latlong[0], $('#<%=hfkmlID.ClientID%>').val())   
+                selectIluminacaoRefresh($('#<%=txtCodIluminacao.ClientID%>').val(), $('#<%=hfCodilumPK.ClientID%>').val(), $('#<%=txtLat.ClientID%>').val(), $('#<%=txtLng.ClientID%>').val(), $('#<%=hfkmlID.ClientID%>').val())   
             }
             else {    
             }
@@ -1300,15 +1235,17 @@
 
                     select: function (e, i) {
 
-                        var latlong = convertUTM(i.item.lat, i.item.lng);
-                        selectIluminacao(i.item.label, i.item.iluPK, latlong[1], latlong[0], i.item.kmlPK)
+                        //var latlong = convertUTM(i.item.lat, i.item.lng);
+                        selectIluminacao(i.item.label, i.item.iluPK, i.item.lat, i.item.lng, i.item.kmlPK)
 
                     },
                     minLength: 1
 
                 });
 
+              
 
+              
                 function selectIluminacao(codIlu, objectid, lat, lng, kmlid) {
                     pos = -1;
                     $('#<%=txtCodIluminacao.ClientID%>').css("background", "#FFFFFF");
@@ -1318,8 +1255,15 @@
                     $('#<%=hfkmlID.ClientID%>').val(kmlid);                  
                     $("#<%=txtLat.ClientID %>").val(lat);
                     $("#<%=txtLng.ClientID %>").val(lng);                
-                
-                    getinfoilum(codIlu, objectid);              
+                   
+                    var retorno = getinfoilum(codIlu, objectid);
+                   
+                    if (retorno) {
+                      
+                        setViewThe(lat, lng);
+                    }
+                    ////// 
+                               
 
                   
                 }
@@ -1331,8 +1275,8 @@
                     $('#<%=hfkmlID.ClientID%>').val(kmlid);
                     $("#<%=txtLat.ClientID %>").val(lat);
                     $("#<%=txtLng.ClientID %>").val(lng);
-
-                    getinfoilum(codIlu, objectid);
+                    
+                     getinfoilum(codIlu, objectid);
                   
                 }
 
@@ -1341,15 +1285,17 @@
                 }
 
 
-                function getinfoilum(codIlu,iluPK) { 
-                    $.ajax({
+            function getinfoilum(codIlu, iluPK) {
+                var result;
+                $.ajax({
+                        async: false,                        
                         url: '<%=ResolveUrl("~/Classes/service.asmx/GetInfo") %>',
                         type: "POST",
                         data: "{ 'ilumid': '" + iluPK + "'}",
                         contentType: "application/json; charset=utf-8",
                         dataType: "json",
                         success: function (data2) {
-
+                            result = true;
                             var parsed2 = $.parseJSON(data2.d);
                             var fotos = ""
                             var cont = 0;
@@ -1411,6 +1357,9 @@
                             alert(response.d);
                         }
                     });
+
+
+                    return result
                 }
 
                 
