@@ -984,16 +984,16 @@
                 panoramaG.setPosition(new google.maps.LatLng(lat, lng));
                 var positionPanorama = new google.maps.LatLng(panoramaG.getPosition().lat(), panoramaG.getPosition().lng());
                 panoramaG.setPov({
-                    heading: bearing(positionPanorama, ip),
+                    heading: bearing(ip, positionPanorama),
                     pitch: pitchG
                 });
                
                 indicatorG.setPosition(ip);
-                var info = document.location.href.replace("#", "") + "#" + ip.toUrlValue() + "/" + ip.toUrlValue() + "/" + Math.round(bearing(positionPanorama ,ip)) + "/0";
+                var info = document.location.href.replace("#", "") + "#" + ip.toUrlValue() + "/" + ip.toUrlValue() + "/" + Math.round(bearing(ip, positionPanorama)) + "/0";
                 $("#linkloc").val(info);
                 mapG.setCenter(ip);
 
-                $("#distance").text((Math.round(distance(positionPanorama,ip) * 100) / 100));
+                $("#distance").text((Math.round(distance(ip, positionPanorama) * 100) / 100));
                 initialize();
                 var latlong = convertUTM(lat, lng);
               
