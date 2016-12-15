@@ -1024,10 +1024,9 @@
 
                // console.log('latlngD:' + latD + ',' + lngD);
                 console.log('indicator: ' + indicator.getPosition())
-                dist = distance(indicator.getPosition(), mapCtr)
-                console.log('distancia: ' + dist);
+               
                 ///////////////////////////////
-                angle = panorama.getPov().heading;
+                /*angle = panorama.getPov().heading;
                 pitch = panorama.getPov().pitch;
                 nP = movePoint(mapCtr, angle, dist);
                 indicator.setPosition(new google.maps.LatLng(nP[0], nP[1]));
@@ -1036,9 +1035,34 @@
                 lngD = panorama.getPosition().lng() - mapCtr.lng();
                 //////////////////////////////////
                 indicator.setPosition(new google.maps.LatLng((latD + indicator.getPosition().lat()), (lngD + indicator.getPosition().lng())));
-                console.log('indicator:' + indicator.getPosition());
+                console.log('indicator:' + indicator.getPosition());*/
 
-                
+                var service = new google.maps.StreetViewService;
+
+                service.getPanoramaByLocation(panorama.getPosition(), 50, function (panoData) {
+                    if (panoData != null) {
+                        var panoCenter = panoData.location.latLng;
+
+                        var heading = google.maps.geometry.spherical.computeHeading(panoCenter, mapCtr);
+
+                        var pov = panorama.getPov();
+                        pov.heading = heading;
+                        panorama.setPov(pov);
+                        
+
+                        //var marker = new google.maps.Marker({
+                        //    map: panorama,
+                        //    position: mapCtr
+                        //});
+                       // var pam = new google.maps.LatLng((panoCenter.lat())*1, (panoCenter.lng())*1);
+                        dist = distance(mapCtr, panoCenter)
+                        console.log('distancia: ' + dist + '----panocenter:' + panoCenter.lat() + ',' + panoCenter.lng()+ '-----mapCtr:' + mapCtr);
+                    } else {
+                        // no streetview found :(
+                        alert('not found'); 
+                    }
+                    
+                });
                
                map.setCenter(indicator.getPosition())
                document.location.hash = mapCtr.toUrlValue() + "/" + indicator.getPosition().toUrlValue() + "/" + Math.round(dang) + "/0";
