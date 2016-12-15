@@ -63,10 +63,15 @@
 
       <!-- Just don’t want to repeat this prefix in every img[src] -->
       <script type="text/javascript">
-          var panoramaG;
-          var mapG;
-          var indicatorG;
-          var mapCG;
+          var dist;
+          var baseheight;
+          var angle;
+          var pitch;         
+          var mapCtr;          
+          var map;
+          var panorama;
+          var indicator;
+          var posarr;
 
           function distance(p1, p2) {
               var R = 6371010;
@@ -110,6 +115,56 @@
           function calcHeight(bh, d, a) {
               return ((Math.tan((Math.PI / 180.0) * a) * d) + bh);
           }
+          function change_position() {
+
+              latD = panorama.getPosition().lat() - mapCtr.lat();
+              lngD = panorama.getPosition().lng() - mapCtr.lng();
+              indicator.setPosition(new google.maps.LatLng((latD + indicator.getPosition().lat()), (lngD + indicator.getPosition().lng())));
+              mapCtr = new google.maps.LatLng(panorama.getPosition().lat(), panorama.getPosition().lng());
+
+              calcAll();
+              posarr.setAt(0, mapCtr);
+              posarr.setAt(1, indicator.getPosition());
+              document.location.hash = mapCtr.toUrlValue() + "/" + indicator.getPosition().toUrlValue() + "/" + Math.round(dang) + "/0";
+          }
+          function change_dragend() {
+
+              dist = distance(indicator.getPosition(), mapCtr)
+              panorama.setPov({
+                  heading: bearing(mapCtr, indicator.getPosition()),
+                  pitch: pitch
+              });
+              document.location.hash = mapCtr.toUrlValue() + "/" + indicator.getPosition().toUrlValue() + "/" + Math.round(dang) + "/0";
+              calcAll();
+
+          }
+          function change_pov() {
+
+              angle = panorama.getPov().heading;
+              pitch = panorama.getPov().pitch;
+              nP = movePoint(mapCtr, angle, dist);
+              indicator.setPosition(new google.maps.LatLng(nP[0], nP[1]));
+              posarr.setAt(1, indicator.getPosition());
+              calcAll();
+          }
+          function calcAll() {
+
+              a = calcHeight(baseheight, dist, pitch);
+              if (angle < 0) { dang = 360 + angle }
+              else { dang = angle }
+              $("#distance").text((Math.round(dist * 100) / 100));
+              $("#heading").text(Math.round(dang));
+              $("#pitch").text(Math.round(pitch));
+              $("#baseheight").text((Math.round(baseheight * 100) / 100));
+              $("#estheight").text((Math.round(a * 100) / 100));
+              info = document.location.href.replace("#", "") + "#" + mapCtr.toUrlValue() + "/" + indicator.getPosition().toUrlValue() + "/" + Math.round(dang) + "/0";
+
+              $("#linkloc").val(info);
+
+          }
+
+          
+
           function initialize() {
               if (document.location.hash.length == 0) {
                   loadInfo = "37.795962,-122.394607/37.795,-122.3946/180/0".split("/");
@@ -117,14 +172,14 @@
               else {
                   loadInfo = document.location.hash.replace("#", "").split("/");
               }
-              var dist;
-              var baseheight = 0;
-              var angle = 1 * loadInfo[2];
-              var pitch = 0;
-              var posarr = new google.maps.MVCArray();
-              var mapCtr = new google.maps.LatLng((loadInfo[0].split(",")[0] * 1), (loadInfo[0].split(",")[1] * 1));
+             
+               baseheight = 0;
+               angle = 1 * loadInfo[2];
+               pitch = 0;
+               posarr = new google.maps.MVCArray();
+               mapCtr = new google.maps.LatLng((loadInfo[0].split(",")[0] * 1), (loadInfo[0].split(",")[1] * 1));
               var mapDiv = document.getElementById('map_canvas');
-              var map = new google.maps.Map(mapDiv, {
+               map = new google.maps.Map(mapDiv, {
                   center: mapCtr,
                   zoom: 18,
                   mapTypeId: google.maps.MapTypeId.SATELLITE
@@ -137,11 +192,11 @@
                       pitch: pitch
                   }
               };
-              var panorama = new google.maps.StreetViewPanorama(document.getElementById("pano"), panoramaOptions);
+               panorama = new google.maps.StreetViewPanorama(document.getElementById("pano"), panoramaOptions);
 
               map.setStreetView(panorama);
 
-              var indicator = new google.maps.Marker({
+               indicator = new google.maps.Marker({
                   map: map,
                   position: new google.maps.LatLng((loadInfo[1].split(",")[0] * 1), (loadInfo[1].split(",")[1] * 1)),
                   draggable: true
@@ -158,41 +213,6 @@
 
               line.setMap(map);
 
-              google.maps.event.addListener(panorama, 'position_changed', function () {
-                    
-                  latD = panorama.getPosition().lat() - mapCtr.lat();
-                  lngD = panorama.getPosition().lng() - mapCtr.lng();
-                  indicator.setPosition(new google.maps.LatLng((latD + indicator.getPosition().lat()), (lngD + indicator.getPosition().lng())));
-                  mapCtr = new google.maps.LatLng(panorama.getPosition().lat(), panorama.getPosition().lng());
-
-                  calcAll();
-                  posarr.setAt(0, mapCtr);
-                  posarr.setAt(1, indicator.getPosition());
-                  document.location.hash = mapCtr.toUrlValue() + "/" + indicator.getPosition().toUrlValue() + "/" + Math.round(dang) + "/0";
-              });
-              google.maps.event.addListener(indicator, 'dragend', function () {
-                    
-                  dist = distance(indicator.getPosition(), mapCtr)
-                  panorama.setPov({
-                      heading: bearing(mapCtr, indicator.getPosition()),
-                      pitch: pitch
-                  });
-                  document.location.hash = mapCtr.toUrlValue() + "/" + indicator.getPosition().toUrlValue() + "/" + Math.round(dang) + "/0";
-                  calcAll();
-
-              });
-              google.maps.event.addListener(panorama, 'pov_changed', function () {
-                     
-                  angle = panorama.getPov().heading;
-                  pitch = panorama.getPov().pitch;
-                  nP = movePoint(mapCtr, angle, dist);
-                  indicator.setPosition(new google.maps.LatLng(nP[0], nP[1]));
-                  posarr.setAt(1, indicator.getPosition());
-                  calcAll();
-              });
-
-             
-
               function calcAll() {
 
                   a = calcHeight(baseheight, dist, pitch);
@@ -208,6 +228,14 @@
                   $("#linkloc").val(info);
 
               }
+
+             
+              google.maps.event.addListener(panorama, 'position_changed', change_position);
+              google.maps.event.addListener(indicator, 'dragend', change_dragend);
+              google.maps.event.addListener(panorama, 'pov_changed',change_pov);
+             
+
+            
               $("#baseset").click(function () {
                   baseheight = -1 * calcHeight(0, dist, pitch);
                   $("#baser").css("top", 200);
@@ -254,11 +282,7 @@
               });
 
 
-              panoramaG = panorama;
-              mapG = map;
-              indicatorG = indicator;
-              mapCG = mapCtr;
-              pitchG = pitch;
+             
 
           }
           
@@ -974,22 +998,50 @@
             var lng = $('#<%=txtLng.ClientID%>').val();
             if(lat != "" && lng!="")
             {
-                var ip = new google.maps.LatLng(lat, lng);
-               
-                panoramaG.setPosition(new google.maps.LatLng(lat, lng));
-                var positionPanorama = new google.maps.LatLng(panoramaG.getPosition().lat(), panoramaG.getPosition().lng());
-                panoramaG.setPov({
-                    heading: bearing(positionPanorama, ip),
-                    pitch: pitchG
-                });
-               
-                indicatorG.setPosition(ip);
-                var info = document.location.href.replace("#", "") + "#" + ip.toUrlValue() + "/" + ip.toUrlValue() + "/" + Math.round(bearing(positionPanorama ,ip)) + "/0";
-                $("#linkloc").val(info);
-                mapG.setCenter(ip);
+                google.maps.event.clearListeners(panorama, 'position_changed', change_position);
+                google.maps.event.clearListeners(indicator, 'dragend', change_dragend);
+                google.maps.event.clearListeners(panorama, 'pov_changed', change_pov);
 
-                $("#distance").text((Math.round(distance(positionPanorama,ip) * 100) / 100));
-                initialize();
+                mapCtr = new google.maps.LatLng((lat * 1), (lng * 1));
+                indicator.setPosition(mapCtr);
+                panorama.setPosition(mapCtr);
+                panorama.setPov({
+                    heading: bearing(mapCtr, indicator.getPosition()),
+                    pitch: pitch
+                });
+                
+                console.log('head:' + bearing(mapCtr, indicator.getPosition()));
+
+                console.log('mapCrt:' + mapCtr.lat() + ',' + mapCtr.lng());
+
+                console.log('position: ' + panorama.getPosition().lat() + ',' + panorama.getPosition().lng() + '---- location: ' + panorama.getLocation().latLng);
+              
+
+               // console.log('latlngD:' + latD + ',' + lngD);
+                console.log('indicator: ' + indicator.getPosition())
+                dist = distance(indicator.getPosition(), mapCtr)
+                console.log('distancia: ' + dist);
+                ///////////////////////////////
+                angle = panorama.getPov().heading;
+                pitch = panorama.getPov().pitch;
+                nP = movePoint(mapCtr, angle, dist);
+                indicator.setPosition(new google.maps.LatLng(nP[0], nP[1]));
+                posarr.setAt(1, indicator.getPosition());
+                latD = panorama.getPosition().lat() - mapCtr.lat();
+                lngD = panorama.getPosition().lng() - mapCtr.lng();
+                //////////////////////////////////
+                indicator.setPosition(new google.maps.LatLng((latD + indicator.getPosition().lat()), (lngD + indicator.getPosition().lng())));
+                console.log('indicator:' + indicator.getPosition());
+
+                
+               
+               map.setCenter(indicator.getPosition())
+               document.location.hash = mapCtr.toUrlValue() + "/" + indicator.getPosition().toUrlValue() + "/" + Math.round(dang) + "/0";
+
+               google.maps.event.addListener(panorama, 'position_changed', change_position);
+               google.maps.event.addListener(indicator, 'dragend', change_dragend);
+               google.maps.event.addListener(panorama, 'pov_changed', change_pov);
+
                 var latlong = convertUTM(lat, lng);
               
                 setValues();
