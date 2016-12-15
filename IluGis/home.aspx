@@ -72,7 +72,7 @@
           var panorama;
           var indicator;
           var posarr;
-
+          var service;
           function distance(p1, p2) {
               var R = 6371010;
               var dLat = (Math.PI / 180.0) * ((p2.lat() - p1.lat()));
@@ -193,7 +193,7 @@
                   }
               };
                panorama = new google.maps.StreetViewPanorama(document.getElementById("pano"), panoramaOptions);
-
+                 service = new google.maps.StreetViewService;
               map.setStreetView(panorama);
 
                indicator = new google.maps.Marker({
@@ -998,7 +998,8 @@
         var pos = -1;
 
         $("#openGlobe").click(function () {// icone que habilita opções de medição
-            
+            var head;
+            var panoCenter;
             var lat = $('#<%=txtLat.ClientID%>').val();
             var lng = $('#<%=txtLng.ClientID%>').val();
             if(lat != "" && lng!="")
@@ -1008,26 +1009,39 @@
                 google.maps.event.clearListeners(panorama, 'pov_changed', change_pov);
 
                 mapCtr = new google.maps.LatLng((lat * 1), (lng * 1));
-                indicator.setPosition(mapCtr);
+                indicator.setPosition(mapCtr);               
                 panorama.setPosition(mapCtr);
-                panorama.setPov({
-                    heading: bearing(mapCtr, indicator.getPosition()),
-                    pitch: pitch
+
+                service.getPanoramaByLocation(panorama.getPosition(), 50, function(panoData) {
+                  
+                        if (panoData != null) {
+                           
+                          panoCenter = panoData.location.latLng;
+                            alert(panoCenter)
+                           head = google.maps.geometry.spherical.computeHeading(panoCenter, mapCtr);
+                        }
+                        console.log('position: ' + panorama.getPosition().lat() + ',' + panorama.getPosition().lng() + '---- panocenter: ' + panoCenter);
+                        console.log('head:' + head);
+                        panorama.setPov({
+                            heading: head,
+                            pitch: pitch
+                        });
+                        console.log('mapCrt:' + mapCtr.lat() + ',' + mapCtr.lng());
+
+
+
+                        var pam= new google.maps.LatLng(panoCenter.lat(),panoCenter.lng());
+
+                        console.log('indicator: ' + indicator.getPosition())
+                        dist = distance(indicator.getPosition(), pam)
+                        console.log('distancia: ' + dist);
                 });
-                
-                console.log('head:' + bearing(mapCtr, indicator.getPosition()));
 
-                console.log('mapCrt:' + mapCtr.lat() + ',' + mapCtr.lng());
+               
 
-                console.log('position: ' + panorama.getPosition().lat() + ',' + panorama.getPosition().lng() + '---- location: ' + panorama.getLocation().latLng);
-              
-
-               // console.log('latlngD:' + latD + ',' + lngD);
-                console.log('indicator: ' + indicator.getPosition())
-                dist = distance(indicator.getPosition(), mapCtr)
-                console.log('distancia: ' + dist);
+               
                 ///////////////////////////////
-                angle = panorama.getPov().heading;
+                /*angle = panorama.getPov().heading;
                 pitch = panorama.getPov().pitch;
                 nP = movePoint(mapCtr, angle, dist);
                 indicator.setPosition(new google.maps.LatLng(nP[0], nP[1]));
@@ -1036,7 +1050,7 @@
                 lngD = panorama.getPosition().lng() - mapCtr.lng();
                 //////////////////////////////////
                 indicator.setPosition(new google.maps.LatLng((latD + indicator.getPosition().lat()), (lngD + indicator.getPosition().lng())));
-                console.log('indicator:' + indicator.getPosition());
+                console.log('indicator:' + indicator.getPosition());*/
 
                 
                
@@ -1047,10 +1061,12 @@
                google.maps.event.addListener(indicator, 'dragend', change_dragend);
                google.maps.event.addListener(panorama, 'pov_changed', change_pov);
 
-                var latlong = convertUTM(lat, lng);
-              
-                setValues();
-                chamaAjax("Geocode", "{ 'lat':'" + lat + "', 'lng':'" + lng + "'}", 1);
+               
+
+
+               // var latlong = convertUTM(lat, lng);              
+               // setValues();
+               // chamaAjax("Geocode", "{ 'lat':'" + lat + "', 'lng':'" + lng + "'}", 1);
             }        
         });
 
