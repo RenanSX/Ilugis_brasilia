@@ -3,106 +3,27 @@
 <asp:Content ID="Content10" ContentPlaceHolderID="head" runat="server">
 <title>IluGIS</title>
 
-    <style>
-        header {
-	        padding: 30px;
-	        overflow: hidden;
-        }
-        header input {
-	        float: right;
-	        padding: 10px;
-	        width: 200px;
-	        border: none;
-        }
-        menu {
-	        position: fixed;	
-            top: 0;
-	        left: 0;
-	        z-index: 1;
-	        width: 230px;
-	        height: 100%;	
-	        background: #e7e7e7;
-            padding-right: 15px;
-            margin:0;
-            padding-left: 15px;
-	        box-shadow: inset -2px -5px 5px 0 rgba(0,0,0,.3)
-
-        }
-        menu {
-	        -webkit-transform: translateX(-220px);
-	        -moz-transform: translateX(-220px);
-	        -ms-transform: translateX(-220px);
-	        transform: translateX(-220px);
-            -webkit-transition:  0.3s; /* For Safari 3.1 to 6.0 */
-            transition:  0.3s;
-        }
-        header, .main , .navbar {
-	        -webkit-transform: translateX(0);
-	        -moz-transform: translateX(0);
-	        -ms-transform: translateX(0);
-	        transform: translateX(0);
-        }
-        .menu-active menu  {
-	        -webkit-transform: translateX(0);
-	        -moz-transform: translateX(0);
-	        -ms-transform: translateX(0);
-	        transform: translateX(0);
-            position: fixed;
-            -webkit-transition:  0.5s; /* For Safari 3.1 to 6.0 */
-            transition:  0.5s;
-        }
-        .menu-active .navbar{
-            -webkit-transform: translateX(200px);
-	        -moz-transform: translateX(200px);
-	        -ms-transform: translateX(200px);
-	        transform: translateX(200px);
-        }
-        .menu-active header, 
-        .menu-active .main {
-	        -webkit-transform: translateX(200px);
-	        -moz-transform: translateX(200px);
-	        -ms-transform: translateX(200px);
-	        transform: translateX(120px);
-    
-        }
-        .menu-active  {
-            transform: translateX(0);
-        }
-        .arrow{
-             position: relative;
-             top:0;
-             left:0;
-             cursor: pointer;
-             margin-top: 700%;
-             margin-left: 100%;
-             z-index: 2; 
-             color: #4F4F4F;          
-        }
-        .arrow:hover{
-            color: #363636;
-        }
-</style>
 </asp:Content>
 
 <asp:Content ID="ContentGerenciamento" ContentPlaceHolderID="body" runat="server">
     <form id="form1" runat="server">
-        <header> 
-         <!---------------------------- Titulo--------------------------------------->
+        <center><h1>Dashboard</h1></center>
+    <div style="display:none;">
+        <!---------------------------- Titulo--------------------------------------->
         <div class="row" style="margin-bottom: 8px;">
-            <h1 style="text-align: center">Relatórios</h1>   
+            <h1 style="text-align: center">Relatórios</h1>
         </div>
         <!-----------------------------Fim titulo------------------------------------>
 
         <!----------------------relatorios---------------------------------------------->
-        
         <div class="row" style="margin-bottom:16px">
             <div class="col-md- col-sm-3 col-md-offset-4 col-sm-offset-4">
                 <asp:LinkButton runat="server" ID="btnEmitirTodosRelatorios" class="btn btn-md btn-primary btn-block" type="submit" Text="Emitir Relatório de todas localidades" title="Emitir relatório de todas as localidades"/>
             </div>
         </div>
-        
-        <div id="doidao" class="row"  style="margin-bottom:16px">
-            <div  id="localidadeRelatorio" class=" col-md-3 col-sm-3 col-md-offset-1 col-sm-offset-1" style="margin-bottom:8px">             
+
+        <div class="row"  style="margin-bottom:16px">
+            <div  id="localidadeRelatorio" class=" col-md-3 col-sm-3 col-md-offset-4 col-sm-offset-4" style="margin-bottom:8px">             
                 <asp:DropDownList  Style="width: 100%; height: 34px;" ID="ddllocalidadeRelatorio" class=" form-control input-sm " runat="server" title="Definir localidade" autofocus="true">
                 <asp:ListItem Text ="Selecione o local" Value = "-1"></asp:ListItem>
                 <asp:ListItem Text ="BARREIRO 01" Value = "BARREIRO01"></asp:ListItem>   
@@ -134,7 +55,9 @@
                 <asp:ListItem Text ="VENDA NOVA 02" Value = "VENDANOVA02"></asp:ListItem>          
                 </asp:DropDownList>
             </div>
-            <div class="col-md-3 col-sm-3">
+            </div>
+         <div class="row"  style="margin-bottom:16px">
+           <div class="col-md- col-sm-3 col-md-offset-4 col-sm-offset-4">
                 <asp:LinkButton runat="server" ID="btnEmitirRelatorio" class="btn btn-md btn-primary btn-block" type="submit" Text="Emitir Relatório" title="Emitir relatório"/>
             </div>
             
@@ -147,110 +70,411 @@
         </div>
 
         <!-------------------------------fim usuario controle------------------------------------------>
+    </div>
+    </form>
+   <div>
+       <table style ="width:100%">
+           <tr>
+               <td style ="width:30%">
+                    <div id="poste" style=" height:400px;"></div>                       
+               </td>
+               <td style ="width:30%">
+                
+                    <div id="reator" style=" height:400px;"> </div>
+                </td>
+                 <td style ="width:40%">
+                
+                    <div id="viz" style=" height:400px;"> </div>
+                </td>
+               
+           
+           </tr>
 
-        <div id="viz" style="width: 600px; height:600px;"></div>
-            </header>
-        <menu>
-            <div class="row">
-            <div class="col-md-10 col-sm-10 col-xs-10">
-            <h3 style="margin-top: 80%; text-align: center">Filtro</h3>
-            <h4 style="margin-top: 10%">Empresas</h4>
-            <asp:DropDownList  Style="width: 100%; height: 34px; margin-bottom: 10px" ID="DropDownList1" class=" form-control input-sm " runat="server" title="Definir localidade" autofocus="true">
-            <asp:ListItem Text ="VENDA NOVA 02" Value = "VENDANOVA02"></asp:ListItem>          
-            </asp:DropDownList>
-            <h4 style="margin-top:0">Localidades</h4>
-            <asp:DropDownList  Style="width: 100%; height: 34px; margin-bottom: 20px; margin-top:0" ID="DropDownList2" class=" form-control input-sm " runat="server" title="Definir localidade" autofocus="true">
-            <asp:ListItem Text ="VENDA NOVA 02" Value = "VENDANOVA02"></asp:ListItem>          
-            </asp:DropDownList>
-            <asp:LinkButton runat="server" ID="LinkButton1" class="btn btn-md btn-primary btn-block" type="submit" Text="Emitir Relatório" title="Emitir relatório"/>
-            </div>
-            <div class="col-md-2 col-sm-2 col-xs-2">
-           <div class="arrow">
-           <span class="glyphicon glyphicon-menu-left" style="font-size: 35px;"></span>
-            </div>
-                    </div>
-            </div>
-             </menu>
-        <script>
 
-            relat("TIPO_FONTE_LUMINARIA", "POTENCIA_FONTE_LUMI");
+           <tr>
+               <td style ="width:30%">
+                   <div id="braco" style=" height:400px;"></div>
 
-            function relat(campo1, campo2) {
-                var campos = "";
-                $.ajax({   
-                    url: '<%=ResolveUrl("~/Classes/service.asmx/GetTipoFonte") %>',
+               </td>
+               <td style ="width:30%">
+                     <div id="rele" style=" height:400px;"></div>
+
+               </td>
+               <td style ="width:40%">
+
+                       <div id="aliment" style=" height:400px;"> </div>
+
+               </td>
+          </tr>
+          
+       </table>
+        
+        
+        
+       
+       
+   </div>
+       
+
+
+    
+
+    <script>
+
+        var listvisual = new Array();
+
+        GetGraph();
+        function GetGraph() {
+            listvisual = [];
+            //Relat("TIPO_BRACO", "#braco", "pie", "Tipo de Braço", false);
+            Relat("TIPO_POSTE", "#poste", "pie", "Tipo de Poste", false);
+            Relat("TIPO_RELE", "#rele", "pie", "Tipo de Relé", false);
+            Relat("TIPO_REATOR", "#reator", "bar", "Tipo de Reator", false);
+            Relat("TIPO_ALIMENTACAO", "#aliment", "bar", "Tipo de Alimentação", false);
+            Relat("TIPO_LUMINARIA", "#viz", "tree_map", "Tipo de Luminária", "GRUPO_TIPO_LUMINARIA");
+
+
+
+        }
+
+
+        function Relat(campo, div, model, title, grupo) {
+
+            var count = 0;
+            var somatoria = 0;
+            var campos = "";
+
+            if (grupo) {
+                $.ajax({
+                    url: '<%=ResolveUrl("~/Classes/service.asmx/GetRelatorioGrupo") %>',
                     type: "POST",
-                    data: "{'campo1': '" + campo1 + "', 'campo2': '" + campo2 + "'}",
+                    data: "{ 'campo': '" + campo + "', 'grupo':'" + grupo + "'}",
                     contentType: "application/json; charset=utf-8",
                     dataType: "json",
                     success: function (data2) {
                         var parsed = $.parseJSON(data2.d);
+
                         var count = 0;
                         $.each(parsed, function (i, jsondata) {
-                            if (jsondata.name != null)
-                            {
-                                if (count == 0) {
-                                    campos += '[{"name": "' + jsondata.name + '","skill": "' + jsondata.skill + '","value": ' + jsondata.value + ' }';
-                                }
-                                else {
-                                    campos += ',{"name": "' + jsondata.name + '","skill": "' + jsondata.skill + '","value": ' + jsondata.value + ' }';
-                                }
-                                count++;
+                            if (count == 0) {
+                                campos += '[{"name": "' + jsondata.name + '","value": ' + jsondata.value + ',"grupo": "' + jsondata.grupo + '"}';
                             }
+                            else {
+                                campos += ',{"name": "' + jsondata.name + '","value": ' + jsondata.value + ',"grupo": "' + jsondata.grupo + '"}';
+                            }
+                            count++;
+
+
                         })
 
                         campos += "]";
-                       var teste = $.parseJSON(campos);
-             
-                        //alert(campos);                       
+
+
+
+
+                        var visualization = d3plus.viz()
+                          .container(div)  // container DIV to hold the visualization
+                          .data($.parseJSON(campos))  // data to use with the visualization
+                          .type(model)   // visualization type
+                          .id(["grupo", "name"])
+                          .size("value")
+                          .title(title)
+                         .labels({ "align": "left", "valign": "top", "resize": true })
+                         .color("grupo")
+                         .ui([
+                        {
+                            "method": "color",
+                            "value": ["grupo", "name"]
+                        }
+                         ])
+                        .legend({ "labels": true, "size": 50 })
+                          .draw();
+
+                        listvisual.push([visualization, div]);
+
+
+                    },
+                    failure: function (response) {
+                        alert(response.d);
+                    },
+                    error: function (response) {
+                        alert(response.d);
                     }
                 });
+
+            }
+            else {
+                $.ajax({
+                    url: '<%=ResolveUrl("~/Classes/service.asmx/GetRelatorio") %>',
+                    type: "POST",
+                    data: "{ 'campo': '" + campo + "'}",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (data2) {
+                        var parsed = $.parseJSON(data2.d);
+
+                        $.each(parsed, function (i, jsondata) {
+
+                            somatoria += jsondata.value;
+
+
+
+
+                        })
+
+                        $.each(parsed, function (i, jsondata) {
+                            if (count == 0) {
+                                campos += '[{"name": "' + jsondata.name + '","value": ' + jsondata.value + ',"campo":"' + campo + '","percent":"' + parseInt(((jsondata.value / somatoria) * 100)) + '%" }';
+                            }
+                            else {
+                                campos += ',{"name": "' + jsondata.name + '","value": ' + jsondata.value + ',"campo":"' + campo + '","percent":"' + parseInt(((jsondata.value / somatoria) * 100)) + '%"}';
+                            }
+
+                            count++;
+
+
+                        })
+
+                        campos += "]";
+
+
+
+                        if (model == "pie") {
+                            var visualization = d3plus.viz()
+                            .container(div)  // container DIV to hold the visualization
+                            .data($.parseJSON(campos))  // data to use with the visualization
+                            .type(model)   // visualization type
+                            .id("name")
+                            .size("value")
+                            .labels({ "align": "left", "valign": "top", "resize": true, "padding": "2", "value": true, "text": "percent" })
+                            .color("name")
+                            .legend({ "labels": true, "size": 50 })
+                            .title(title)
+                            .mouse({
+                                "click": function (d, viz) {
+
+
+
+                                    setTimeout(filtro("TIPO_POSTE", d.campo, d.name, "#poste", "pie", "Tipo de Poste", false), 500);
+                                    setTimeout(filtro("TIPO_RELE", d.campo, d.name, "#rele", "pie", "Tipo de Relé", false), 500);
+                                    setTimeout(filtro("TIPO_REATOR", d.campo, d.name, "#reator", "bar", "Tipo de Reator", false), 500);
+                                    setTimeout(filtro("TIPO_ALIMENTACAO", d.campo, d.name, "#aliment", "bar", "Tipo de Alimentação", false), 500);
+                                    setTimeout(filtro("TIPO_LUMINARIA", d.campo, d.name, "#viz", "tree_map", "Tipo de Luminária", "GRUPO_TIPO_LUMINARIA"), 500);
+                                    setTimeout(filtro("TIPO_BRACO", d.campo, d.name, "#braco", "pie", "Tipo de Braço", false), 500);
+
+
+
+
+
+
+                                }
+                            })
+                           .draw();
+
+
+                        }
+                        else {
+                            var visualization = d3plus.viz()
+                                  .container(div)  // container DIV to hold the visualization
+                                  .data($.parseJSON(campos))  // data to use with the visualization
+                                  .type(model)   // visualization type
+                                  .id("name")
+                                  .x("name")
+                                  .y("value")
+                                  .labels({ "align": "center", "valign": "top", "resize": true })
+                                  .text("percent")
+                                  .title(title)
+                                 .mouse({
+                                     "click": function (d, viz) {
+
+                                         setTimeout(filtro("TIPO_POSTE", d.campo, d.name, "#poste", "pie", "Tipo de Poste", false), 500);
+                                         setTimeout(filtro("TIPO_RELE", d.campo, d.name, "#rele", "pie", "Tipo de Relé", false), 500);
+                                         setTimeout(filtro("TIPO_REATOR", d.campo, d.name, "#reator", "bar", "Tipo de Reator", false), 500);
+                                         setTimeout(filtro("TIPO_ALIMENTACAO", d.campo, d.name, "#aliment", "bar", "Tipo de Alimentação", false), 500);
+                                         setTimeout(filtro("TIPO_LUMINARIA", d.campo, d.name, "#viz", "tree_map", "Tipo de Luminária", "GRUPO_TIPO_LUMINARIA"), 400);
+                                         setTimeout(filtro("TIPO_BRACO", d.campo, d.name, "#braco", "pie", "Tipo de Braço", false), 500);
+
+
+
+
+
+
+                                     }
+                                 })
+                                 .draw();
+                        }
+
+
+                        listvisual.push([visualization, div]);
+
+
+
+
+                    },
+                    failure: function (response) {
+                        alert(response.d);
+                    },
+                    error: function (response) {
+                        alert(response.d);
+                    }
+                });
+
             }
 
-          //  var sample_data = [
-          //      { "name": "METALICO", "skill": "0", "value": 100 },
-          //      { "name": "METALICO", "skill": "35", "value": 100 },
-          //      { "name": "METALICO", "skill": "70", "value": 100 },
-          //      { "name": "METALICO", "skill": "80", "value": 100 },
-          //      { "name": "METALICO", "skill": "100", "value": 100 },
-          //      { "name": "METALICO", "skill": "125", "value": 100 },
-          //      { "name": "METALICO", "skill": "150", "value": 100 },
-          //      { "name": "METALICO", "skill": "250", "value": 100 },
-          //      { "name": "METALICO", "skill": "400", "value": 100 },
-          //      { "name": "MERCURIO", "skill": "0", "value": 0 },
-          //      { "name": "MERCURIO", "skill": "35", "value": 100 },
-          //      { "name": "MERCURIO", "skill": "70", "value": 0 },
-          //      { "name": "MERCURIO", "skill": "80", "value": 0 },
-          //      { "name": "MERCURIO", "skill": "100", "value": 0 },
-          //      { "name": "MERCURIO", "skill": "125", "value": 12 },
-          //      { "name": "MERCURIO", "skill": "150", "value": 111 },
-          //      { "name": "MERCURIO", "skill": "250", "value": 200 },
-          //      { "name": "MERCURIO", "skill": "400", "value": 45 },
-          //      { "name": "SODIO", "skill": "0", "value": 0 },
-          //      { "name": "SODIO", "skill": "35", "value": 100 },
-          //      { "name": "SODIO", "skill": "70", "value": 123 },
-          //      { "name": "SODIO", "skill": "80", "value": 50 },
-          //      { "name": "SODIO", "skill": "100", "value": 42 },
-          //      { "name": "SODIO", "skill": "125", "value": 34 },
-          //      { "name": "SODIO", "skill": "150", "value": 64 },
-          //      { "name": "SODIO", "skill": "250", "value": 34 },
-          //      { "name": "SODIO", "skill": "400", "value": 189 }
-            //];
 
-            //var visualization = d3plus.viz()
-            //             .container("#viz")
-            //             .data($.parseJSON(campos))
-            //             .id(["name","skill"])
-            //             .size("value")
-            //             .type("pie")
-            //             .draw();
 
-            $('.arrow').on('click touchstart', function (e) {
-                $('html').toggleClass('menu-active');
-                e.preventDefault();
+        }
 
-            });
-</script>
-    
-    </form>
+        function filtro(campo, filtro, value, div, model, title, grupo) {
+            var count = 0;
+            var somatoria = 0;
+            var campos = "";
+            if (grupo) {
+                somatoria = 0;
+                campos = "";
+                count = 0;
+                $.ajax({
+                    url: '<%=ResolveUrl("~/Classes/service.asmx/GetRelatorioFiltroGrupo") %>',
+                    type: "POST",
+                    data: "{ 'campo': '" + campo + "','filtro':'" + filtro + "','value':'" + value + "','grupo':'" + grupo + "'}",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (data2) {
+                        var parsed = $.parseJSON(data2.d);
+
+                        $.each(parsed, function (i, jsondata) {
+
+                            somatoria += jsondata.value;
+
+
+
+
+                        })
+
+                        $.each(parsed, function (i, jsondata) {
+                            if (count == 0) {
+                                campos += '[{"name": "' + jsondata.name + '","value": ' + jsondata.value + ',"grupo":"' + jsondata.grupo + '","campo":"' + campo + '","percent":"' + parseInt(((jsondata.value / somatoria) * 100)) + '%" }';
+                            }
+                            else {
+                                campos += ',{"name": "' + jsondata.name + '","value": ' + jsondata.value + ',"grupo":"' + jsondata.grupo + '","campo":"' + campo + '","percent":"' + parseInt(((jsondata.value / somatoria) * 100)) + '%"}';
+                            }
+
+                            count++;
+
+
+                        })
+
+                        campos += "]";
+
+
+
+
+                        for (var i = 0; i < listvisual.length; i++) {
+                            if (listvisual[i][1] == div) {
+                                listvisual[i][0].data($.parseJSON(campos)).draw();
+                            }
+                        }
+
+
+
+
+
+                    },
+                    failure: function (response) {
+
+                        alert("Falha:" + response.d);
+                    },
+                    error: function (response) {
+                        alert("Erro:" + response.d);
+                    }
+                });
+
+            }
+            else {
+                somatoria = 0;
+                campos = "";
+                $.ajax({
+                    url: '<%=ResolveUrl("~/Classes/service.asmx/GetRelatorioFiltro") %>',
+                    type: "POST",
+                    data: "{ 'campo': '" + campo + "','filtro': '" + filtro + "','value':'" + value + "'}",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (data2) {
+                        var parsed = $.parseJSON(data2.d);
+
+                        $.each(parsed, function (i, jsondata) {
+
+                            somatoria += jsondata.value;
+
+
+
+
+                        })
+
+                        $.each(parsed, function (i, jsondata) {
+                            if (count == 0) {
+                                campos += '[{"name": "' + jsondata.name + '","value": ' + jsondata.value + ',"campo":"' + campo + '","percent":"' + parseInt(((jsondata.value / somatoria) * 100)) + '%" }';
+                            }
+                            else {
+                                campos += ',{"name": "' + jsondata.name + '","value": ' + jsondata.value + ',"campo":"' + campo + '","percent":"' + parseInt(((jsondata.value / somatoria) * 100)) + '%"}';
+                            }
+
+                            count++;
+
+
+                        })
+
+                        campos += "]";
+
+
+
+                        if (campo == "TIPO_BRACO") {
+
+                        }
+
+                        for (var i = 0; i < listvisual.length; i++) {
+                            if (listvisual[i][1] == div) {
+                                listvisual[i][0].data($.parseJSON(campos)).draw();
+                            }
+                        }
+
+
+
+
+
+                    },
+                    failure: function (response) {
+
+                        alert("Falha:" + response.d);
+                    },
+                    error: function (response) {
+                        alert("Erro:" + response.d);
+                    }
+                });
+
+
+
+            }
+
+
+
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    </script>
+
 </asp:Content>
