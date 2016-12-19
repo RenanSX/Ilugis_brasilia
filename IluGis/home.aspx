@@ -158,6 +158,8 @@
               $("#pitch").text(Math.round(pitch));
               $("#baseheight").text((Math.round(baseheight * 100) / 100));
               $("#estheight").text((Math.round(a * 100) / 100));
+              $("#indicatorx").text(indicator.getPosition().lng());
+              $("#indicatory").text(indicator.getPosition().lat());
               info = document.location.href.replace("#", "") + "#" + mapCtr.toUrlValue() + "/" + indicator.getPosition().toUrlValue() + "/" + Math.round(dang) + "/0";
 
               $("#linkloc").val(info);
@@ -224,6 +226,8 @@
                   $("#pitch").text(Math.round(pitch));
                   $("#baseheight").text((Math.round(baseheight * 100) / 100));
                   $("#estheight").text((Math.round(a * 100) / 100));
+                  $("#indicatorx").text(indicator.getPosition().lng());
+                  $("#indicatory").text(indicator.getPosition().lat());
                   info = document.location.href.replace("#", "") + "#" + mapCtr.toUrlValue() + "/" + indicator.getPosition().toUrlValue() + "/" + Math.round(dang) + "/0";
 
                   $("#linkloc").val(info);
@@ -865,13 +869,21 @@
                         <button id="baseset" type="button" class="btn btn-lg btn-primary">Marcar base</button>
                     </div>
                     <table class="table table-bordered">
-              <thead>
-              <tr><th>Heading</th><th>Pitch</th><th>Distance (m)</th><th>Base Height</th><th>Estimated Height (m)</th></tr>
-              </thead>
-              <tbody>
-              <tr><td id="heading"></td><td id="pitch"></td><td id="distance"></td><td id="baseheight"></td><td id="estheight"></td></tr>
-              </tbody>
-              </table>
+                          <thead>
+                          <tr><th>Heading</th><th>Pitch</th><th>Distance (m)</th><th>Base Height</th><th>Estimated Height (m)</th></tr>
+                          </thead>
+                          <tbody>
+                          <tr><td id="heading"></td><td id="pitch"></td><td id="distance"></td><td id="baseheight"></td><td id="estheight"></td></tr>
+                          </tbody>
+                    </table>
+                  <table class="table table-bordered">
+                          <thead>
+                          <tr style="width:100%"><th style="width:50%">Longitude</th><th style="width:50%">Latitude</th></tr>
+                          </thead>
+                          <tbody>
+                          <tr style="width:100%"><td style="width:50%" id="indicatorx"></td><td style="width:50%" id="indicatory"></td></tr>
+                          </tbody>
+                    </table>
                </div>
           
             </div>
